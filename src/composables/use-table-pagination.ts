@@ -1,5 +1,6 @@
-import type { PaginationState } from '@tanstack/vue-table'
-import { computed, ref, watch, type ComputedRef } from 'vue'
+import type { OnChangeFn, PaginationState, TableOptions } from '@tanstack/vue-table'
+import type { ComputedRef, Ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 export interface TablePaginationOptions {
   /**
@@ -34,7 +35,14 @@ export interface PaginationInfo {
   totalRows: number
 }
 
-export function useTablePagination(options: TablePaginationOptions = {}) {
+export interface UseTablePaginationReturn<TData> {
+  pagination: Ref<PaginationState>
+  paginationInfo: ComputedRef<PaginationInfo>
+  paginationConfig: Pick<TableOptions<TData>, 'manualPagination' | 'pageCount'>
+  onPaginationChange: OnChangeFn<PaginationState>
+}
+
+export function useTablePagination<TData>(options: TablePaginationOptions = {}): UseTablePaginationReturn<TData> {
   // 分頁狀態
   const pagination = ref<PaginationState>({
     pageIndex: options.initialPagination?.pageIndex ?? 0,
@@ -48,7 +56,7 @@ export function useTablePagination(options: TablePaginationOptions = {}) {
       () => pagination.value.pageIndex,
       (newPage) => {
         options.onPageChange?.(newPage)
-      }
+      },
     )
 
     // 監聽每頁條數變更
@@ -56,7 +64,7 @@ export function useTablePagination(options: TablePaginationOptions = {}) {
       () => pagination.value.pageSize,
       (newPageSize) => {
         options.onPageSizeChange?.(newPageSize)
-      }
+      },
     )
   }
 
@@ -78,20 +86,16 @@ export function useTablePagination(options: TablePaginationOptions = {}) {
     })) as ComputedRef<PaginationInfo>,
     // 表格配置
     paginationConfig: {
-      state: {
-        get pagination() {
-          return pagination.value
-        },
-      },
-      onPaginationChange: (updater: any) => {
-        if (typeof updater === 'function') {
-          pagination.value = updater(pagination.value)
-        } else {
-          pagination.value = updater
-        }
-      },
       manualPagination: options.remote,
       pageCount: pageCount.value,
+    },
+    onPaginationChange: (updater) => {
+      if (typeof updater === 'function') {
+        pagination.value = updater(pagination.value)
+      }
+      else {
+        pagination.value = updater
+      }
     },
   }
 }

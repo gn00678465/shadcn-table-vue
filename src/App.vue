@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useDataTable, type PaginationInfo } from '@/composables/use-data-table'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { DataTable } from '@/components/data-table'
+import { useDataTable } from '@/composables/use-data-table'
 import { faker } from '@faker-js/faker/locale/zh_TW'
-import { ref, onMounted } from 'vue'
+import { h, onMounted, ref } from 'vue'
 
 interface Person {
-  id: number
+  id: string
   firstName: string
   lastName: string
   email: string
@@ -15,6 +15,25 @@ interface Person {
 }
 
 const columns: ColumnDef<Person>[] = [
+  {
+    id: 'select',
+    header: ({ table }) => {
+      return h('input', {
+        type: 'checkbox',
+        checked: table.getIsAllRowsSelected(),
+        onChange: table.getToggleAllRowsSelectedHandler(),
+      })
+    },
+    cell: ({ row }) => {
+      return h('div', [
+        h('input', {
+          type: 'checkbox',
+          checked: row.getIsSelected(),
+          onChange: row.getToggleSelectedHandler(),
+        }),
+      ])
+    },
+  },
   {
     accessorKey: 'id',
     header: 'ID',
@@ -55,7 +74,7 @@ const currentData = ref<Person[]>([])
 // 生成假數據
 function generateFakeData(start: number, length: number): Person[] {
   return Array.from({ length }, (_, index) => ({
-    id: start + index + 1,
+    id: `${start + index + 1}`,
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     email: faker.internet.email(),
@@ -72,7 +91,8 @@ async function fetchData(page: number, pageSize: number): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 500))
     const start = page * pageSize
     currentData.value = generateFakeData(start, pageSize)
-  } finally {
+  }
+  finally {
     loading.value = false
   }
 }
@@ -87,11 +107,17 @@ const { table, pagination } = useDataTable<Person>({
     pageIndex: 0,
     pageSize: 10,
   },
+  rowKey: row => `${row.id}`,
+  initialRowSelection: ref(['1']),
+  enableRowSelection: true,
   onPageChange: async (page: number): Promise<void> => {
     await fetchData(page, pagination.value.pageSize)
   },
   onPageSizeChange: async (pageSize: number): Promise<void> => {
     await fetchData(pagination.value.pageIndex, pageSize)
+  },
+  onSelectionUpdate(arg) {
+    console.log('🚀 ~ onSelectionUpdate ~ arg:', arg)
   },
 })
 
@@ -104,12 +130,14 @@ onMounted(() => {
 <template>
   <div class="container mx-auto py-10">
     <div v-if="!currentData.length && loading" class="flex h-[200px] items-center justify-center">
-      <div class="text-lg">載入中...</div>
+      <div class="text-lg">
+        載入中...
+      </div>
     </div>
-    
+
     <template v-else>
       <DataTable :table="table" />
-      
+
       <!-- 分頁信息 -->
       <div class="flex items-center justify-between space-x-2 py-4">
         <div class="flex-1 text-sm text-muted-foreground">
