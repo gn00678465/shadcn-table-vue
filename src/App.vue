@@ -3,7 +3,7 @@ import type { ColumnDef } from '@tanstack/vue-table'
 import { DataTable } from '@/components/data-table'
 import { useDataTable } from '@/composables/use-data-table'
 import { faker } from '@faker-js/faker/locale/zh_TW'
-import { h, onMounted, ref } from 'vue'
+import { h, nextTick, onMounted, ref } from 'vue'
 
 interface Person {
   id: string
@@ -98,7 +98,7 @@ async function fetchData(page: number, pageSize: number): Promise<void> {
 }
 
 // 初始化表格
-const { table, pagination } = useDataTable<Person>({
+const { table, pagination, toggleColumnVisibility } = useDataTable<Person>({
   columns,
   data: currentData,
   remote: true,

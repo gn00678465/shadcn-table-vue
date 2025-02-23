@@ -1,8 +1,10 @@
 import type { ColumnDef, Row, Table } from '@tanstack/vue-table'
 import type { ComputedRef, Ref } from 'vue'
+import type { TableColumnVisibilityOptions, UseTableColumnVisibilityReturn } from './use-table-column-visibility'
 import type { PaginationInfo, TablePaginationOptions } from './use-table-pagination'
 import type { TableRowSelectionOptions } from './use-table-row-selection'
 import { getCoreRowModel, getPaginationRowModel, useVueTable } from '@tanstack/vue-table'
+import { useTableColumnVisibility } from './use-table-column-visibility'
 import { useTablePagination } from './use-table-pagination'
 import { useTableRowSelection } from './use-table-row-selection'
 
@@ -10,7 +12,8 @@ export { type PaginationInfo }
 
 export interface DataTableOptions<TData> extends
   TablePaginationOptions,
-  TableRowSelectionOptions<TData> {
+  TableRowSelectionOptions<TData>,
+  TableColumnVisibilityOptions {
   /**
    * 表格列定義
    */
@@ -27,7 +30,8 @@ export interface DataTableOptions<TData> extends
   rowKey?: (originalRow: TData, index: number, parent?: Row<TData> | undefined) => string
 }
 
-export interface DataTableReturn<TData> {
+export interface DataTableReturn<TData> extends
+  Pick<UseTableColumnVisibilityReturn, 'toggleColumnVisibility' | 'resetColumnVisibility'> {
   table: Table<TData>
   pagination: ComputedRef<PaginationInfo>
 }
@@ -50,6 +54,13 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     enableRowSelection: true,
   })
 
+  // 列可見性邏輯
+  const { columnVisibility, toggleColumnVisibility, resetColumnVisibility, onColumnVisibilityChange } = useTableColumnVisibility({
+    initialVisibility: options.initialVisibility,
+    onVisibilityChange: options.onVisibilityChange,
+    persistKey: options.persistKey,
+  })
+
   // 創建表格實例
   const table = useVueTable({
     get data() {
@@ -64,6 +75,9 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
       get rowSelection() {
         return rowSelection.value
       },
+      get columnVisibility() {
+        return columnVisibility.value
+      },
     },
     columns: options.columns,
     getCoreRowModel: getCoreRowModel(),
@@ -74,10 +88,14 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     // row selection
     ...rowSelectionConfig,
     onRowSelectionChange,
+    // column visibility
+    onColumnVisibilityChange,
   })
 
   return {
     table,
     pagination: paginationInfo,
+    toggleColumnVisibility,
+    resetColumnVisibility,
   }
 }
