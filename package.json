@@ -16,12 +16,14 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.475.0",
+    "reka-ui": "^2.0.0",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "vue": "^3.5.13"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.3.0",
+    "@faker-js/faker": "^9.5.0",
     "@types/node": "^22.13.5",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",
