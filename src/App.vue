@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ColumnDef } from '@tanstack/vue-table'
-import { DataTable } from '@/components/data-table'
+import { DataTable, DataTableSkeleton } from '@/components/data-table'
 import { useDataTable } from '@/composables/use-data-table'
 import { faker } from '@faker-js/faker/locale/zh_TW'
 import { h, onMounted, ref } from 'vue'
@@ -88,7 +88,7 @@ async function fetchData(page: number, pageSize: number): Promise<void> {
   loading.value = true
   try {
     // 模擬API延遲
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise(resolve => setTimeout(resolve, 1000))
     const start = page * pageSize
     currentData.value = generateFakeData(start, pageSize)
   }
@@ -134,11 +134,9 @@ onMounted(() => {
 
 <template>
   <div class="container mx-auto py-10">
-    <div v-if="!currentData.length && loading" class="flex h-[200px] items-center justify-center">
-      <div class="text-lg">
-        載入中...
-      </div>
-    </div>
+    <template v-if="!currentData.length && loading">
+      <DataTableSkeleton :column-count="columns.length" :row-count="2" />
+    </template>
 
     <template v-else>
       <DataTable :table="table" />

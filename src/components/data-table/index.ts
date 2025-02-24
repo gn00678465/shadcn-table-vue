@@ -1,5 +1,5 @@
-import DataTable from './data-table.vue'
+export { default as DataTableSkeleton } from './data-table-skeleton.vue'
+export type * from './data-table-skeleton.vue'
 
-export { DataTable }
-export default DataTable
+export { default as DataTable } from './data-table.vue'
 export type * from './data-table.vue'
