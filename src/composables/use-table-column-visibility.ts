@@ -19,8 +19,6 @@ export interface TableColumnVisibilityOptions {
 
 export interface UseTableColumnVisibilityReturn {
   columnVisibility: Ref<VisibilityState>
-  toggleColumnVisibility: (columnId: string, visible?: boolean) => void
-  resetColumnVisibility: () => void
   onColumnVisibilityChange: (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)) => void
 }
 
@@ -60,24 +58,8 @@ export function useTableColumnVisibility(
     options.initialVisibility ?? loadPersistedState(),
   )
 
-  // 切換列可見性
-  function toggleColumnVisibility(columnId: string, visible?: boolean): void {
-    columnVisibility.value = {
-      ...columnVisibility.value,
-      [columnId]: visible ?? !columnVisibility.value[columnId],
-    }
-  }
-
-  // 重置可見性
-  function resetColumnVisibility(): void {
-    columnVisibility.value = {}
-    persistState({})
-  }
-
   return {
     columnVisibility,
-    toggleColumnVisibility,
-    resetColumnVisibility,
     onColumnVisibilityChange: (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)) => {
       const newState = typeof updater === 'function' ? updater(columnVisibility.value) : updater
       columnVisibility.value = newState

@@ -1,5 +1,6 @@
 import type { OnChangeFn, PaginationState, TableOptions } from '@tanstack/vue-table'
 import type { ComputedRef, Ref } from 'vue'
+import { valueUpdater } from '@/lib/utils'
 import { computed, ref, watch } from 'vue'
 
 export interface TablePaginationOptions {
@@ -90,12 +91,7 @@ export function useTablePagination<TData>(options: TablePaginationOptions = {}):
       pageCount: pageCount.value,
     },
     onPaginationChange: (updater) => {
-      if (typeof updater === 'function') {
-        pagination.value = updater(pagination.value)
-      }
-      else {
-        pagination.value = updater
-      }
+      valueUpdater(updater, pagination)
     },
   }
 }

@@ -1,9 +1,11 @@
 import type { ColumnDef, Row, Table } from '@tanstack/vue-table'
 import type { ComputedRef, Ref } from 'vue'
-import type { TableColumnVisibilityOptions, UseTableColumnVisibilityReturn } from './use-table-column-visibility'
+import type { TableColumnPinningOptions } from './use-table-column-pinning'
+import type { TableColumnVisibilityOptions } from './use-table-column-visibility'
 import type { PaginationInfo, TablePaginationOptions } from './use-table-pagination'
 import type { TableRowSelectionOptions } from './use-table-row-selection'
 import { getCoreRowModel, getPaginationRowModel, useVueTable } from '@tanstack/vue-table'
+import { useTableColumnPinning } from './use-table-column-pinning'
 import { useTableColumnVisibility } from './use-table-column-visibility'
 import { useTablePagination } from './use-table-pagination'
 import { useTableRowSelection } from './use-table-row-selection'
@@ -13,7 +15,8 @@ export { type PaginationInfo }
 export interface DataTableOptions<TData> extends
   TablePaginationOptions,
   TableRowSelectionOptions<TData>,
-  TableColumnVisibilityOptions {
+  TableColumnVisibilityOptions,
+  Omit<TableColumnPinningOptions, 'persistKey'> {
   /**
    * 表格列定義
    */
@@ -30,8 +33,7 @@ export interface DataTableOptions<TData> extends
   rowKey?: (originalRow: TData, index: number, parent?: Row<TData> | undefined) => string
 }
 
-export interface DataTableReturn<TData> extends
-  Pick<UseTableColumnVisibilityReturn, 'toggleColumnVisibility' | 'resetColumnVisibility'> {
+export interface DataTableReturn<TData> {
   table: Table<TData>
   pagination: ComputedRef<PaginationInfo>
 }
@@ -50,14 +52,20 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
   const { rowSelection, onRowSelectionChange, rowSelectionConfig } = useTableRowSelection<TData>({
     multi: options.multi,
     initialRowSelection: options.initialRowSelection,
-    onSelectionUpdate: options.onSelectionUpdate,
+    onUpdateCheckedRowKeys: options.onUpdateCheckedRowKeys,
     enableRowSelection: true,
   })
 
   // 列可見性邏輯
-  const { columnVisibility, toggleColumnVisibility, resetColumnVisibility, onColumnVisibilityChange } = useTableColumnVisibility({
+  const { columnVisibility, onColumnVisibilityChange } = useTableColumnVisibility({
     initialVisibility: options.initialVisibility,
     onVisibilityChange: options.onVisibilityChange,
+    persistKey: options.persistKey,
+  })
+
+  // column pinning
+  const { columnPinning, onColumnPinningChange, columnPinningConfig } = useTableColumnPinning({
+    initialPinning: options.initialPinning,
     persistKey: options.persistKey,
   })
 
@@ -78,6 +86,9 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
       get columnVisibility() {
         return columnVisibility.value
       },
+      get columnPinning() {
+        return columnPinning.value
+      },
     },
     columns: options.columns,
     getCoreRowModel: getCoreRowModel(),
@@ -90,12 +101,13 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     onRowSelectionChange,
     // column visibility
     onColumnVisibilityChange,
+    // column pinning
+    ...columnPinningConfig,
+    onColumnPinningChange,
   })
 
   return {
     table,
     pagination: paginationInfo,
-    toggleColumnVisibility,
-    resetColumnVisibility,
   }
 }

@@ -3,7 +3,7 @@ import type { ColumnDef } from '@tanstack/vue-table'
 import { DataTable } from '@/components/data-table'
 import { useDataTable } from '@/composables/use-data-table'
 import { faker } from '@faker-js/faker/locale/zh_TW'
-import { h, nextTick, onMounted, ref } from 'vue'
+import { h, onMounted, ref } from 'vue'
 
 interface Person {
   id: string
@@ -98,7 +98,7 @@ async function fetchData(page: number, pageSize: number): Promise<void> {
 }
 
 // 初始化表格
-const { table, pagination, toggleColumnVisibility } = useDataTable<Person>({
+const { table, pagination } = useDataTable<Person>({
   columns,
   data: currentData,
   remote: true,
@@ -108,7 +108,11 @@ const { table, pagination, toggleColumnVisibility } = useDataTable<Person>({
     pageSize: 10,
   },
   rowKey: row => `${row.id}`,
-  initialRowSelection: ref(['1']),
+  initialRowSelection: ref(['10']),
+  initialPinning: {
+    left: ['select', 'id'],
+    right: ['age'],
+  },
   enableRowSelection: true,
   onPageChange: async (page: number): Promise<void> => {
     await fetchData(page, pagination.value.pageSize)
@@ -116,8 +120,9 @@ const { table, pagination, toggleColumnVisibility } = useDataTable<Person>({
   onPageSizeChange: async (pageSize: number): Promise<void> => {
     await fetchData(pagination.value.pageIndex, pageSize)
   },
-  onSelectionUpdate(arg) {
-    console.log('🚀 ~ onSelectionUpdate ~ arg:', arg)
+  onUpdateCheckedRowKeys(keys) {
+    // eslint-disable-next-line no-console
+    console.log('🚀 ~ onUpdateCheckedRowKeys ~ keys:', keys)
   },
 })
 

@@ -1,5 +1,6 @@
 import type { OnChangeFn, Row, RowSelectionState, TableOptions } from '@tanstack/vue-table'
 import type { Ref } from 'vue'
+import { valueUpdater } from '@/lib/utils'
 import { ref, watch } from 'vue'
 
 export interface TableRowSelectionOptions<TData> {
@@ -18,12 +19,13 @@ export interface TableRowSelectionOptions<TData> {
   /**
    * 選擇項變更後的回調函數
    */
-  onSelectionUpdate?: (arg: RowSelectionState) => void | Promise<void>
+  onUpdateCheckedRowKeys?: (arg: Array<string>) => void | Promise<void>
 }
 
 export interface UseTableRowSelectionReturn<TData> {
   rowSelection: Ref<RowSelectionState>
   onRowSelectionChange: OnChangeFn<RowSelectionState>
+  resetRowSelection: () => void
   rowSelectionConfig: Pick<TableOptions<TData>, 'enableMultiRowSelection' | 'paginateExpandedRows' | 'enableRowSelection'>
 }
 
@@ -40,19 +42,21 @@ export function useTableRowSelection<TData>(options: TableRowSelectionOptions<TD
   }
 
   const onRowSelectionChange: OnChangeFn<RowSelectionState> = (updateOrValue) => {
-    rowSelection.value
-      = typeof updateOrValue === 'function'
-        ? updateOrValue(rowSelection.value)
-        : updateOrValue
+    valueUpdater(updateOrValue, rowSelection)
   }
 
   watch(rowSelection, (_) => {
-    options.onSelectionUpdate?.(_)
+    options.onUpdateCheckedRowKeys?.(Object.keys(_))
   })
+
+  function resetRowSelection(): void {
+    onRowSelectionChange({})
+  }
 
   return {
     rowSelection,
     onRowSelectionChange,
+    resetRowSelection,
     rowSelectionConfig: {
       enableMultiRowSelection: options.multi,
       paginateExpandedRows: false,
