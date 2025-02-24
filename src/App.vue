@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ColumnDef } from '@tanstack/vue-table'
-import { DataTable, DataTableSkeleton } from '@/components/data-table'
+import { DataTable, DataTablePagination, DataTableSkeleton } from '@/components/data-table'
 import { useDataTable } from '@/composables/use-data-table'
 import { faker } from '@faker-js/faker/locale/zh_TW'
 import { h, onMounted, ref } from 'vue'
@@ -142,29 +142,7 @@ onMounted(() => {
       <DataTable :table="table" />
 
       <!-- 分頁信息 -->
-      <div class="flex items-center justify-between space-x-2 py-4">
-        <div class="flex-1 text-sm text-muted-foreground">
-          第 {{ pagination.pageIndex + 1 }}/{{ pagination.pageCount }} 頁，
-          共 {{ pagination.totalRows }} 條記錄
-          <span v-if="loading" class="ml-2">載入中...</span>
-        </div>
-        <div class="flex items-center space-x-2">
-          <button
-            class="rounded-lg border px-2.5 py-0.5 text-sm disabled:opacity-50"
-            :disabled="pagination.pageIndex === 0 || loading"
-            @click="table.previousPage()"
-          >
-            上一頁
-          </button>
-          <button
-            class="rounded-lg border px-2.5 py-0.5 text-sm disabled:opacity-50"
-            :disabled="pagination.pageIndex === pagination.pageCount - 1 || loading"
-            @click="table.nextPage()"
-          >
-            下一頁
-          </button>
-        </div>
-      </div>
+      <DataTablePagination :table="table" :default-page="pagination.pageIndex" :item-count="pagination.itemCount" />
     </template>
   </div>
 </template>

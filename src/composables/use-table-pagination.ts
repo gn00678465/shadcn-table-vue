@@ -33,7 +33,7 @@ export interface PaginationInfo {
   pageIndex: number
   pageSize: number
   pageCount: number
-  totalRows: number
+  itemCount: number
 }
 
 export interface UseTablePaginationReturn<TData> {
@@ -83,7 +83,7 @@ export function useTablePagination<TData>(options: TablePaginationOptions = {}):
       pageIndex: pagination.value.pageIndex,
       pageSize: pagination.value.pageSize,
       pageCount: pageCount.value,
-      totalRows: totalRows.value,
+      itemCount: totalRows.value,
     })) as ComputedRef<PaginationInfo>,
     // 表格配置
     paginationConfig: {
