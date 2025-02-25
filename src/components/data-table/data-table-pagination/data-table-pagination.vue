@@ -22,13 +22,17 @@ import {
 import { cn } from '@/lib/utils'
 import { dataTablePaginationVariants } from './index'
 
+defineOptions({
+  name: 'DataTablePagination',
+})
+
 const props = withDefaults(defineProps<DataTablePaginationProps<TData>>(), {
   page: 1,
   pageSizes: () => [10, 20, 30, 40],
   itemCount: 0,
   showEdges: true,
   disabled: false,
-  size: 'default',
+  size: undefined,
 })
 </script>
 
@@ -57,25 +61,48 @@ export interface DataTablePaginationProps<TData> {
       :disabled="props.disabled"
     >
       <PaginationList v-slot="{ items }" class="flex items-center gap-1">
-        <PaginationFirst v-if="!props.showEdges" :class="cn(dataTablePaginationVariants({ size: props.size }))" :disabled="!table.getCanPreviousPage() || props.disabled" @click="table.setPageIndex(0)" />
-        <PaginationPrev :class="cn(dataTablePaginationVariants({ size: props.size }))" :disabled="!table.getCanPreviousPage() || props.disabled" @click="table.previousPage()" />
+        <PaginationFirst
+          v-if="!props.showEdges"
+          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: !table.getCanPreviousPage() || props.disabled }))"
+          :disabled="!table.getCanPreviousPage() || props.disabled"
+          @click="table.setPageIndex(0)"
+        />
+        <PaginationPrev
+          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: !table.getCanPreviousPage() || props.disabled }))"
+          :disabled="!table.getCanPreviousPage() || props.disabled"
+          @click="table.previousPage()"
+        />
 
         <template v-for="(item, index) in items">
           <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
-            <Button :class="cn(dataTablePaginationVariants({ size: props.size }))" :variant="item.value === currentPage ? 'default' : 'outline'" @click="table.setPageIndex(item.value - 1)">
+            <Button
+              :class="cn(dataTablePaginationVariants({ size: props.size, disabled: props.disabled }))"
+              :variant="item.value === currentPage ? 'default' : 'outline'"
+              @click="table.setPageIndex(item.value - 1)"
+            >
               {{ item.value }}
             </Button>
           </PaginationListItem>
           <PaginationEllipsis v-else :key="item.type" :index="index" />
         </template>
 
-        <PaginationNext :class="cn(dataTablePaginationVariants({ size: props.size }))" :disabled="!table.getCanNextPage() || props.disabled" @click="table.nextPage()" />
-        <PaginationLast v-if="!props.showEdges" :class="cn(dataTablePaginationVariants({ size: props.size }))" :disabled="!table.getCanNextPage() || props.disabled" @click="table.setPageIndex(table.getPageCount() - 1)" />
+        <PaginationNext
+          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: !table.getCanNextPage() || props.disabled }))"
+          :disabled="!table.getCanNextPage() || props.disabled"
+          @click="table.nextPage()"
+        />
+        <PaginationLast
+          v-if="!props.showEdges"
+          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: !table.getCanNextPage() || props.disabled }))"
+          :disabled="!table.getCanNextPage() || props.disabled"
+          @click="table.setPageIndex(table.getPageCount() - 1)"
+        />
       </PaginationList>
     </Pagination>
     <div class="flex items-center space-x-2">
       <Select
         :model-value="`${table.getState().pagination.pageSize}`"
+        :disabled="props.disabled"
         @update:model-value="(pageSize) => { table.setPageSize(Number(pageSize)) }"
       >
         <SelectTrigger :class="cn(dataTablePaginationVariants({ size: props.size }), 'w-[auto]')">

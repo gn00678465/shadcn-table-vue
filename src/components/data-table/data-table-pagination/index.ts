@@ -4,13 +4,18 @@ import { cva } from 'class-variance-authority'
 export const dataTablePaginationVariants = cva('', {
   variants: {
     size: {
-      default: 'h-10 w-10',
-      sm: 'h-8 w-8 text-sm',
-      xs: 'h-6 w-6 text-sm',
+      lg: 'h-10 w-10',
+      default: 'h-8 w-8 text-sm',
+      sm: 'h-6 w-6 text-sm',
+    },
+    disabled: {
+      true: 'disabled:cursor-not-allowed',
+      false: '',
     },
   },
   defaultVariants: {
     size: 'default',
+    disabled: false,
   },
 })
 

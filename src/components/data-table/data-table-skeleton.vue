@@ -14,20 +14,9 @@ const props = withDefaults(defineProps<DataTableSkeletonProps>(), {
   rowCount: 10,
   cellWidths: () => ['auto'],
   shrinkZero: false,
-  onlyTableBody: false,
 })
 
-const { rowCount, columnCount, cellWidths, shrinkZero, onlyTableBody } = toRefs(props)
-
-function renderColGroup() {
-  return (
-    <colgroup>
-      {Array.from({ length: columnCount.value }).map(() => {
-        return <col />
-      })}
-    </colgroup>
-  )
-}
+const { rowCount, columnCount, cellWidths, shrinkZero } = toRefs(props)
 </script>
 
 <script lang="tsx">
@@ -69,7 +58,7 @@ interface DataTableSkeletonProps {
 </script>
 
 <template>
-  <div v-if="!onlyTableBody" :class="cn('w-full space-y-2.5 overflow-auto', props.class)">
+  <div :class="cn('w-full space-y-2.5 overflow-auto', props.class)">
     <div class="rounded-md border">
       <Table>
         <TableHeader>
@@ -95,21 +84,6 @@ interface DataTableSkeletonProps {
       </Table>
     </div>
   </div>
-  <template v-else>
-    <Table class="table-fixed">
-      <TableBody>
-        <component :is="renderColGroup" />
-        <TableRow v-for="(_, i) of Array.from({ length: rowCount })" :key="i" class="hover:bg-transparent">
-          <TableCell
-            v-for="(__, j) of Array.from({ length: columnCount })" :key="j"
-            :style="{ width: cellWidths[j], minWidth: shrinkZero ? cellWidths[j] : 'auto' }"
-          >
-            <Skeleton class="h-6 w-full" />
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
-  </template>
 </template>
 
 <style scoped>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ColumnDef } from '@tanstack/vue-table'
-import { DataTable, DataTablePagination, DataTableSkeleton } from '@/components/data-table'
+import { DataTable, DataTablePagination, DataTableSkeleton, DataTableViewOptions } from '@/components/data-table'
 import { useDataTable } from '@/composables/use-data-table'
 import { faker } from '@faker-js/faker/locale/zh_TW'
 import { h, onMounted, ref } from 'vue'
@@ -139,10 +139,15 @@ onMounted(() => {
     </template>
 
     <template v-else>
-      <DataTable :table="table" />
+      <div>
+        <div>
+          <DataTableViewOptions :table="table" />
+        </div>
+        <DataTable :table="table" />
 
-      <!-- 分頁信息 -->
-      <DataTablePagination :table="table" :page="pagination.pageIndex" :item-count="pagination.itemCount" size="sm" />
+        <!-- 分頁信息 -->
+        <DataTablePagination :table="table" :page="pagination.pageIndex" :item-count="pagination.itemCount" />
+      </div>
     </template>
   </div>
 </template>
