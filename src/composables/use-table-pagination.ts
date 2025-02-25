@@ -1,6 +1,7 @@
 import type { OnChangeFn, PaginationState, TableOptions } from '@tanstack/vue-table'
 import type { ComputedRef, Ref } from 'vue'
 import { valueUpdater } from '@/lib/utils'
+import { getPaginationRowModel } from '@tanstack/vue-table'
 import { computed, ref, watch } from 'vue'
 
 export interface TablePaginationOptions {
@@ -18,7 +19,7 @@ export interface TablePaginationOptions {
   /**
    * 遠程數據總數
    */
-  totalRows?: number
+  itemCount?: number
   /**
    * 分頁變更回調
    */
@@ -39,7 +40,11 @@ export interface PaginationInfo {
 export interface UseTablePaginationReturn<TData> {
   pagination: Ref<PaginationState>
   paginationInfo: ComputedRef<PaginationInfo>
-  paginationConfig: Pick<TableOptions<TData>, 'manualPagination' | 'pageCount'>
+  paginationConfig: Pick<TableOptions<TData>, 'manualPagination' |
+  'pageCount' |
+  'rowCount' |
+  'getPaginationRowModel' |
+  'autoResetPageIndex'>
   onPaginationChange: OnChangeFn<PaginationState>
 }
 
@@ -70,9 +75,9 @@ export function useTablePagination<TData>(options: TablePaginationOptions = {}):
   }
 
   // 計算總頁數
-  const totalRows = computed(() => options.totalRows ?? 0)
+  const itemCount = computed(() => options.itemCount ?? 0)
   const pageCount = computed(() => {
-    return Math.ceil(totalRows.value / pagination.value.pageSize)
+    return Math.ceil(itemCount.value / pagination.value.pageSize)
   })
 
   return {
@@ -83,12 +88,14 @@ export function useTablePagination<TData>(options: TablePaginationOptions = {}):
       pageIndex: pagination.value.pageIndex,
       pageSize: pagination.value.pageSize,
       pageCount: pageCount.value,
-      itemCount: totalRows.value,
+      itemCount: itemCount.value,
     })) as ComputedRef<PaginationInfo>,
     // 表格配置
     paginationConfig: {
       manualPagination: options.remote,
-      pageCount: pageCount.value,
+      rowCount: itemCount.value,
+      getPaginationRowModel: options.remote ? undefined : getPaginationRowModel(),
+      autoResetPageIndex: false,
     },
     onPaginationChange: (updater) => {
       valueUpdater(updater, pagination)

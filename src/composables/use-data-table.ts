@@ -4,7 +4,7 @@ import type { TableColumnPinningOptions } from './use-table-column-pinning'
 import type { TableColumnVisibilityOptions } from './use-table-column-visibility'
 import type { PaginationInfo, TablePaginationOptions } from './use-table-pagination'
 import type { TableRowSelectionOptions } from './use-table-row-selection'
-import { getCoreRowModel, getPaginationRowModel, useVueTable } from '@tanstack/vue-table'
+import { getCoreRowModel, useVueTable } from '@tanstack/vue-table'
 import { useTableColumnPinning } from './use-table-column-pinning'
 import { useTableColumnVisibility } from './use-table-column-visibility'
 import { useTablePagination } from './use-table-pagination'
@@ -42,7 +42,7 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
   // 分頁邏輯
   const { pagination, paginationConfig, paginationInfo, onPaginationChange } = useTablePagination<TData>({
     remote: options.remote,
-    totalRows: options.totalRows,
+    itemCount: options.itemCount,
     initialPagination: options.initialPagination,
     onPageChange: options.onPageChange,
     onPageSizeChange: options.onPageSizeChange,
@@ -92,7 +92,6 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     },
     columns: options.columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: options.remote ? undefined : getPaginationRowModel(),
     // pagination
     ...paginationConfig,
     onPaginationChange,

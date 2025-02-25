@@ -88,7 +88,7 @@ async function fetchData(page: number, pageSize: number): Promise<void> {
   loading.value = true
   try {
     // 模擬API延遲
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 500))
     const start = page * pageSize
     currentData.value = generateFakeData(start, pageSize)
   }
@@ -102,7 +102,7 @@ const { table, pagination } = useDataTable<Person>({
   columns,
   data: currentData,
   remote: true,
-  totalRows: totalItems,
+  itemCount: totalItems,
   initialPagination: {
     pageIndex: 0,
     pageSize: 10,
@@ -142,7 +142,7 @@ onMounted(() => {
       <DataTable :table="table" />
 
       <!-- 分頁信息 -->
-      <DataTablePagination :table="table" :default-page="pagination.pageIndex" :item-count="pagination.itemCount" />
+      <DataTablePagination :table="table" :page="pagination.pageIndex" :item-count="pagination.itemCount" size="sm" />
     </template>
   </div>
 </template>
