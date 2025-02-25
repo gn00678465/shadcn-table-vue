@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="TData">
 import type { Table } from '@tanstack/vue-table'
+import type { VNodeChild } from 'vue'
 import type { DataTablePaginationVariants } from './index'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
+import { computed } from 'vue'
 import { dataTablePaginationVariants } from './index'
 
 defineOptions({
@@ -28,11 +30,31 @@ defineOptions({
 
 const props = withDefaults(defineProps<DataTablePaginationProps<TData>>(), {
   page: 1,
+  pageSize: 10,
+  pageCount: 1,
   pageSizes: () => [10, 20, 30, 40],
   itemCount: 0,
   showEdges: true,
   disabled: false,
   size: undefined,
+  prefix: undefined,
+  suffix: undefined,
+})
+
+const slots = defineSlots<{
+  prefix: (info: PaginationInfo) => any
+  suffix: (info: PaginationInfo) => any
+}>()
+
+const paginationInfo = computed<PaginationInfo>(() => {
+  return {
+    page: props.page,
+    pageSize: props.pageSize,
+    itemCount: props.itemCount,
+    pageCount: props.pageCount,
+    startIndex: (props.page * props.pageSize) + 1,
+    endIndex: (props.page + 1) * props.pageSize,
+  }
 })
 </script>
 
@@ -40,16 +62,35 @@ const props = withDefaults(defineProps<DataTablePaginationProps<TData>>(), {
 export interface DataTablePaginationProps<TData> {
   table: Table<TData>
   page?: number
+  pageSize?: number
   pageSizes?: number[]
+  pageCount?: number
   itemCount?: number
   showEdges?: boolean
   disabled?: boolean
   size?: DataTablePaginationVariants['size']
+  prefix?: (info: PaginationInfo) => VNodeChild
+  suffix?: (info: PaginationInfo) => VNodeChild
+}
+
+export interface PaginationInfo {
+  startIndex: number
+  endIndex: number
+  page: number
+  pageSize: number
+  pageCount: number
+  itemCount: number | undefined
 }
 </script>
 
 <template>
   <div class="flex items-center gap-2 overflow-auto">
+    <template v-if="!!slots.prefix">
+      <slot name="prefix" v-bind="paginationInfo" />
+    </template>
+    <template v-else-if="!!props.prefix">
+      <component :is="props.prefix(paginationInfo)" v-if="!!props.prefix" />
+    </template>
     <Pagination
       v-slot="{ page: currentPage }"
       :page="props.page + 1"
@@ -105,7 +146,7 @@ export interface DataTablePaginationProps<TData> {
         :disabled="props.disabled"
         @update:model-value="(pageSize) => { table.setPageSize(Number(pageSize)) }"
       >
-        <SelectTrigger :class="cn(dataTablePaginationVariants({ size: props.size }), 'w-[auto]')">
+        <SelectTrigger :class="cn(dataTablePaginationVariants({ size: props.size }), 'w-[auto]', 'px-2')">
           <SelectValue :placeholder="`${props.table.getState().pagination.pageSize} pre page`" />
         </SelectTrigger>
         <SelectContent side="top">
@@ -115,6 +156,12 @@ export interface DataTablePaginationProps<TData> {
         </SelectContent>
       </Select>
     </div>
+    <template v-if="!!slots.suffix">
+      <slot name="suffix" v-bind="paginationInfo" />
+    </template>
+    <template v-else-if="!!props.suffix">
+      <component :is="props.suffix(paginationInfo)" v-if="!!props.prefix" />
+    </template>
   </div>
 </template>
 

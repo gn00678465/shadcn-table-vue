@@ -146,7 +146,18 @@ onMounted(() => {
         <DataTable :table="table" />
 
         <!-- 分頁信息 -->
-        <DataTablePagination :table="table" :page="pagination.pageIndex" :item-count="pagination.itemCount" />
+        <DataTablePagination
+          :table="table"
+          :page="pagination.pageIndex"
+          :page-count="pagination.pageCount"
+          :page-size="pagination.pageSize"
+          size="sm"
+          :item-count="pagination.itemCount"
+        >
+          <template #prefix="props">
+            <span>{{ `${props.startIndex}`.padStart(2, '0') }} of {{ `${props.endIndex}`.padStart(2, '0') }}</span>
+          </template>
+        </DataTablePagination>
       </div>
     </template>
   </div>

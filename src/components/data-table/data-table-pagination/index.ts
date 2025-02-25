@@ -1,12 +1,12 @@
 import type { VariantProps } from 'class-variance-authority'
 import { cva } from 'class-variance-authority'
 
-export const dataTablePaginationVariants = cva('', {
+export const dataTablePaginationVariants = cva('p-0', {
   variants: {
     size: {
       lg: 'h-10 w-10',
-      default: 'h-8 w-8 text-sm',
-      sm: 'h-6 w-6 text-sm',
+      default: 'h-8 w-8',
+      sm: 'h-7 w-7 text-sm',
     },
     disabled: {
       true: 'disabled:cursor-not-allowed',
