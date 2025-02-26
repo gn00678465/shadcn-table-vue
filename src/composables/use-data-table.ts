@@ -105,6 +105,9 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     },
     columns: options.columns,
     getCoreRowModel: getCoreRowModel(),
+    debugTable: import.meta.env.DEV,
+    debugHeaders: import.meta.env.DEV,
+    debugColumns: import.meta.env.DEV,
     // pagination
     ...paginationConfig,
     onPaginationChange,

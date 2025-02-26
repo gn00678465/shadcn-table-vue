@@ -18,15 +18,14 @@ const props = withDefaults(defineProps<DataTableProps<TData>>(), {
 })
 
 const { class: className, renderExpanded, flexHeight } = toRefs(props)
-const columnCount = computed(() => [...Array.from({ length: props.table.getAllLeafColumns().length })])
 
 const isStickyLayout = computed(() => flexHeight.value)
 
 function renderColGroup() {
   return (
     <colgroup>
-      {columnCount.value.map(() => {
-        return <col />
+      {props.table.getAllLeafColumns().map((column) => {
+        return <col width={column.getSize() === 150 ? undefined : column.getSize()} />
       })}
     </colgroup>
   )
