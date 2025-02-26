@@ -113,7 +113,7 @@ export interface DataTableProps<TData> {
   table: TanstackTable<TData>
   class?: HTMLAttributes['class']
   /** */
-  renderExpanded?: (row: Row<TData>) => VNodeChild
+  renderExpanded?: (row: Row<TData>, rowIndex: number) => VNodeChild
 }
 </script>
 
@@ -142,7 +142,7 @@ export interface DataTableProps<TData> {
         </TableHeader>
         <TableBody>
           <template v-if="table.getRowModel().rows?.length">
-            <template v-for="row of table.getRowModel().rows" :key="row.id">
+            <template v-for="(row, idx) of table.getRowModel().rows" :key="row.id">
               <TableRow
 
                 :data-state="row.getIsSelected() && 'selected'"
@@ -160,7 +160,7 @@ export interface DataTableProps<TData> {
               </TableRow>
               <TableRow v-if="row.getIsExpanded() && !!renderExpanded">
                 <TableCell :colspan="row.getAllCells().length">
-                  <component :is="renderExpanded(row)" />
+                  <component :is="renderExpanded(row, idx)" />
                 </TableCell>
               </TableRow>
             </template>

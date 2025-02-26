@@ -2,7 +2,7 @@ import type { ExpandedState, OnChangeFn, Row, TableOptions } from '@tanstack/vue
 import type { Ref } from 'vue'
 import { valueUpdater } from '@/lib/utils'
 import { getExpandedRowModel } from '@tanstack/vue-table'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 export interface TableExpandingOptions<TData> {
   /**
@@ -15,6 +15,10 @@ export interface TableExpandingOptions<TData> {
    * @returns
    */
   enableExpanding?: boolean | ((row?: Row<TData>) => boolean)
+  /**
+   * 展開項變更後的回調函數
+   */
+  onUpdateExpandedKeys?: (arg: Array<string>) => void | Promise<void>
 }
 
 export interface UseTableExpandingReturn<TData> {
@@ -34,6 +38,10 @@ export function useTableExpanding<TData>(options: TableExpandingOptions<TData> =
         }, {} as Record<string, boolean>)
       : {}
   }
+
+  watch(expanded, (_) => {
+    options.onUpdateExpandedKeys?.(Object.keys(_))
+  })
 
   const onExpandedChange: OnChangeFn<ExpandedState> = (updateOrValue) => {
     valueUpdater(updateOrValue, expanded)

@@ -75,7 +75,8 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
   // expanding
   const { onExpandedChange, expanded, expandedConfig } = useTableExpanding({
     initialExpanded: options.initialExpanded,
-    enableExpanding: options?.enableExpanding,
+    enableExpanding: options.enableExpanding,
+    onUpdateExpandedKeys: options.onUpdateCheckedRowKeys,
   })
 
   // 創建表格實例

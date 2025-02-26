@@ -149,6 +149,10 @@ const { table, pagination } = useDataTable<Person>({
     // eslint-disable-next-line no-console
     console.log('🚀 ~ onUpdateCheckedRowKeys ~ keys:', keys)
   },
+  onUpdateExpandedKeys(keys) {
+    // eslint-disable-next-line no-console
+    console.log("🚀 ~ onUpdateExpandedKeys ~ keys:", keys)
+  },
 })
 
 // 初始加載
