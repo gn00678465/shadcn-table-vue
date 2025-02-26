@@ -1,6 +1,6 @@
 <script setup lang="tsx" generic="TData">
-import type { Table as TanstackTable } from '@tanstack/vue-table'
-import type { HTMLAttributes } from 'vue'
+import type { Row, Table as TanstackTable } from '@tanstack/vue-table'
+import type { HTMLAttributes, VNodeChild } from 'vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import { getCommonPinningStyles } from '@/utils/data-table'
@@ -16,7 +16,7 @@ const props = withDefaults(defineProps<DataTableProps<TData>>(), {
   class: '',
 })
 
-const { class: className } = toRefs(props)
+const { class: className, renderExpanded } = toRefs(props)
 const columnCount = computed(() => [...Array.from({ length: props.table.getAllLeafColumns().length })])
 
 function stickyHeaderLayout() {
@@ -112,6 +112,8 @@ export interface DataTableProps<TData> {
    */
   table: TanstackTable<TData>
   class?: HTMLAttributes['class']
+  /** */
+  renderExpanded?: (row: Row<TData>) => VNodeChild
 }
 </script>
 
@@ -140,22 +142,28 @@ export interface DataTableProps<TData> {
         </TableHeader>
         <TableBody>
           <template v-if="table.getRowModel().rows?.length">
-            <TableRow
-              v-for="row of table.getRowModel().rows"
-              :key="row.id"
-              :data-state="row.getIsSelected() && 'selected'"
-            >
-              <TableCell
-                v-for="cell of row.getVisibleCells()" :key="cell.id" :style="{
-                  ...getCommonPinningStyles({ column: cell.column, withBorder: true }),
-                }"
+            <template v-for="row of table.getRowModel().rows" :key="row.id">
+              <TableRow
+
+                :data-state="row.getIsSelected() && 'selected'"
               >
-                <FlexRender
-                  :render="cell.column.columnDef.cell"
-                  :props="cell.getContext()"
-                />
-              </TableCell>
-            </TableRow>
+                <TableCell
+                  v-for="cell of row.getVisibleCells()" :key="cell.id" :style="{
+                    ...getCommonPinningStyles({ column: cell.column, withBorder: true }),
+                  }"
+                >
+                  <FlexRender
+                    :render="cell.column.columnDef.cell"
+                    :props="cell.getContext()"
+                  />
+                </TableCell>
+              </TableRow>
+              <TableRow v-if="row.getIsExpanded() && !!renderExpanded">
+                <TableCell :colspan="row.getAllCells().length">
+                  <component :is="renderExpanded(row)" />
+                </TableCell>
+              </TableRow>
+            </template>
           </template>
         </TableBody>
       </Table>

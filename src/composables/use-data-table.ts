@@ -2,11 +2,13 @@ import type { ColumnDef, Row, Table } from '@tanstack/vue-table'
 import type { ComputedRef, Ref } from 'vue'
 import type { TableColumnPinningOptions } from './use-table-column-pinning'
 import type { TableColumnVisibilityOptions } from './use-table-column-visibility'
+import type { TableExpandingOptions } from './use-table-expanding'
 import type { PaginationInfo, TablePaginationOptions } from './use-table-pagination'
 import type { TableRowSelectionOptions } from './use-table-row-selection'
 import { getCoreRowModel, useVueTable } from '@tanstack/vue-table'
 import { useTableColumnPinning } from './use-table-column-pinning'
 import { useTableColumnVisibility } from './use-table-column-visibility'
+import { useTableExpanding } from './use-table-expanding'
 import { useTablePagination } from './use-table-pagination'
 import { useTableRowSelection } from './use-table-row-selection'
 
@@ -16,7 +18,8 @@ export interface DataTableOptions<TData> extends
   TablePaginationOptions,
   TableRowSelectionOptions<TData>,
   TableColumnVisibilityOptions,
-  Omit<TableColumnPinningOptions, 'persistKey'> {
+  Omit<TableColumnPinningOptions, 'persistKey'>,
+  TableExpandingOptions<TData> {
   /**
    * 表格列定義
    */
@@ -69,6 +72,12 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     persistKey: options.persistKey,
   })
 
+  // expanding
+  const { onExpandedChange, expanded, expandedConfig } = useTableExpanding({
+    initialExpanded: options.initialExpanded,
+    enableExpanding: options?.enableExpanding,
+  })
+
   // 創建表格實例
   const table = useVueTable({
     get data() {
@@ -89,6 +98,9 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
       get columnPinning() {
         return columnPinning.value
       },
+      get expanded() {
+        return expanded.value
+      },
     },
     columns: options.columns,
     getCoreRowModel: getCoreRowModel(),
@@ -103,6 +115,9 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     // column pinning
     ...columnPinningConfig,
     onColumnPinningChange,
+    // expanded
+    ...expandedConfig,
+    onExpandedChange,
   })
 
   return {

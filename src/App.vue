@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ColumnDef } from '@tanstack/vue-table'
+import type { ColumnDef, Row } from '@tanstack/vue-table'
 import { DataTable, DataTablePagination, DataTableSkeleton, DataTableViewOptions } from '@/components/data-table'
 import { useDataTable } from '@/composables/use-data-table'
 import { faker } from '@faker-js/faker/locale/zh_TW'
@@ -14,7 +14,26 @@ interface Person {
   age: number
 }
 
+function renderExpanded(row: Row<Person>) {
+  if (!row.getCanExpand()) {
+    return h('p', '🔵')
+  }
+  return h(
+    'button',
+    {
+      onClick: row.getToggleExpandedHandler(),
+      style: { cursor: 'pointer' },
+    },
+    row.getIsExpanded() ? '👇' : '👉',
+  )
+}
+
 const columns: ColumnDef<Person>[] = [
+  {
+    id: 'expander',
+    header: () => null,
+    cell: ({ row }) => renderExpanded(row),
+  },
   {
     id: 'select',
     header: ({ table }) => {
@@ -33,6 +52,7 @@ const columns: ColumnDef<Person>[] = [
         }),
       ])
     },
+    size: 60,
   },
   {
     accessorKey: 'id',
@@ -103,6 +123,7 @@ const { table, pagination } = useDataTable<Person>({
   data: currentData,
   remote: true,
   itemCount: totalItems,
+  enableExpanding: true,
   initialPagination: {
     pageIndex: 0,
     pageSize: 10,
@@ -110,7 +131,11 @@ const { table, pagination } = useDataTable<Person>({
   rowKey: row => `${row.id}`,
   initialRowSelection: ref(['10']),
   initialPinning: {
-    left: ['select', 'id'],
+    left: [
+      'expander',
+      // 'select',
+      // 'id'
+    ],
     right: ['age'],
   },
   enableRowSelection: true,
@@ -143,9 +168,13 @@ onMounted(() => {
         <div>
           <DataTableViewOptions :table="table" />
         </div>
-        <DataTable :table="table" />
+        <DataTable
+          :table="table"
+          :renderExpanded="(row) => h('pre', { style: 'fontSize: 10px' }, [
+            h('code', JSON.stringify(row.original, null, 2))
+          ])"
+        />
 
-        <!-- 分頁信息 -->
         <DataTablePagination
           :table="table"
           :page="pagination.pageIndex"
@@ -153,6 +182,7 @@ onMounted(() => {
           :page-size="pagination.pageSize"
           size="sm"
           :item-count="pagination.itemCount"
+
         >
           <template #prefix="props">
             <span>{{ `${props.startIndex}`.padStart(2, '0') }} of {{ `${props.endIndex}`.padStart(2, '0') }}</span>

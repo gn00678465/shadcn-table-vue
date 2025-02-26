@@ -27,6 +27,10 @@ const props = withDefaults(defineProps<DataTableViewOptionsProps<TData>>(), {
   renderLabel: undefined,
 })
 
+const slots = defineSlots<{
+  trigger: () => VNodeChild
+}>()
+
 const triggerRef = useTemplateRef('triggerRef')
 
 const checkStatus = computed(() => {
@@ -37,7 +41,6 @@ const checkStatus = computed(() => {
 <script lang="ts">
 export interface DataTableViewOptionsProps<TData> {
   table: Table<TData>
-  renderTrigger?: () => VNodeChild
   renderLabel?: (col: Column<TData>) => VNodeChild
   renderCheckbox?: (value: boolean | 'indeterminate') => VNodeChild
 }
@@ -53,14 +56,15 @@ export interface DataTableViewOptionsProps<TData> {
         role="combobox"
         size="sm"
         class="ml-auto hidden h-8 gap-2 focus:outline-none focus:ring-1 focus:ring-ring focus-visible:ring-0 lg:flex"
+        :as-child="!!slots.trigger"
       >
-        <template v-if="!!props.renderTrigger">
-          <component :is="props.renderTrigger" />
-        </template>
-        <template v-else>
+        <template v-if="!slots.trigger">
           <Settings2 class="size-4" />
           View
           <ChevronsUpDown class="ml-auto size-4 shrink-0 opacity-50" />
+        </template>
+        <template v-else>
+          <component :is="slots.trigger" />
         </template>
       </Button>
     </PopoverTrigger>
