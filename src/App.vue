@@ -33,6 +33,7 @@ const columns: ColumnDef<Person>[] = [
     id: 'expander',
     header: () => null,
     cell: ({ row }) => renderExpanded(row),
+    size: 30,
   },
   {
     id: 'select',
@@ -133,7 +134,7 @@ const { table, pagination } = useDataTable<Person>({
   initialPinning: {
     left: [
       'expander',
-      // 'select',
+      'select',
       // 'id'
     ],
     right: ['age'],
@@ -151,7 +152,7 @@ const { table, pagination } = useDataTable<Person>({
   },
   onUpdateExpandedKeys(keys) {
     // eslint-disable-next-line no-console
-    console.log("🚀 ~ onUpdateExpandedKeys ~ keys:", keys)
+    console.log('🚀 ~ onUpdateExpandedKeys ~ keys:', keys)
   },
 })
 
@@ -174,8 +175,9 @@ onMounted(() => {
         </div>
         <DataTable
           :table="table"
-          :renderExpanded="(row) => h('pre', { style: 'fontSize: 10px' }, [
-            h('code', JSON.stringify(row.original, null, 2))
+          :flex-height="true"
+          :render-expanded="(row) => h('pre', { style: 'fontSize: 10px' }, [
+            h('code', JSON.stringify(row.original, null, 2)),
           ])"
         />
 
@@ -186,7 +188,6 @@ onMounted(() => {
           :page-size="pagination.pageSize"
           size="sm"
           :item-count="pagination.itemCount"
-
         >
           <template #prefix="props">
             <span>{{ `${props.startIndex}`.padStart(2, '0') }} of {{ `${props.endIndex}`.padStart(2, '0') }}</span>
