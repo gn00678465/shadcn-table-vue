@@ -84,6 +84,7 @@ const columns: ColumnDef<Person>[] = [
     accessorKey: 'age',
     header: '年齡',
     cell: ({ getValue }) => getValue(),
+    size: 120,
   },
 ]
 
@@ -170,7 +171,7 @@ onMounted(() => {
 
     <template v-else>
       <div>
-        <div>
+        <div class="flex">
           <DataTableViewOptions :table="table" />
         </div>
         <DataTable
@@ -179,6 +180,7 @@ onMounted(() => {
           :render-expanded="(row) => h('pre', { style: 'fontSize: 10px' }, [
             h('code', JSON.stringify(row.original, null, 2)),
           ])"
+          style="height: 100%; max-height: 600px;"
         />
 
         <DataTablePagination

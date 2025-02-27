@@ -55,7 +55,7 @@ export interface DataTableViewOptionsProps<TData> {
         variant="outline"
         role="combobox"
         size="sm"
-        class="ml-auto hidden h-8 gap-2 focus:outline-none focus:ring-1 focus:ring-ring focus-visible:ring-0 lg:flex"
+        class="ml-auto hidden h-8 gap-2 focus:outline-none focus:ring-1 focus:ring-ring focus-visible:ring-0 lg:inline-flex"
         :as-child="!!slots.trigger"
       >
         <template v-if="!slots.trigger">
