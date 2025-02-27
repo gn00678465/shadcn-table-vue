@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@tanstack/react-table':
+        specifier: ^8.0.0
+        version: 8.21.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@tanstack/vue-table':
         specifier: ^8.21.2
         version: 8.21.2(vue@3.5.13(typescript@5.7.3))
@@ -38,7 +41,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^4.3.0
-        version: 4.3.0(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))
+        version: 4.3.0(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)
       '@faker-js/faker':
         specifier: ^9.5.0
         version: 9.5.0
@@ -62,7 +65,7 @@ importers:
         version: 9.20.1(jiti@2.4.2)
       shadcn-vue:
         specifier: 1.0.0
-        version: 1.0.0(@vitest/ui@3.0.6(vitest@3.0.6))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))(vue@3.5.13(typescript@5.7.3))
+        version: 1.0.0(@vitest/ui@3.0.6)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)(vue@3.5.13(typescript@5.7.3))
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -727,6 +730,13 @@ packages:
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
+
+  '@tanstack/react-table@8.21.2':
+    resolution: {integrity: sha512-11tNlEDTdIhMJba2RBH+ecJ9l1zgS2kjmexDPAraulc8jeNA4xocSNeyzextT0XJyASil4XsCYlJmf5jEWAtYg==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      react: '>=16.8'
+      react-dom: '>=16.8'
 
   '@tanstack/table-core@8.21.2':
     resolution: {integrity: sha512-uvXk/U4cBiFMxt+p9/G7yUWI/UbHYbyghLCjlpWZ3mLeIZiUBSKcUnw9UnKkdRz7Z/N4UBuFLWQdJCjUe7HjvA==}
@@ -2453,6 +2463,15 @@ packages:
   rc9@2.1.2:
     resolution: {integrity: sha512-btXCnMmRIBINM2LDZoEmOogIZU7Qe7zn4BpomSKZ/ykbLObuBdvG+mFq11DL6fjH1DRwHhrlgtYWG96bJiC7Cg==}
 
+  react-dom@19.0.0:
+    resolution: {integrity: sha512-4GV5sHFG0e/0AD4X+ySy6UJd3jVl1iNsNHdpad0qhABJ11twS3TTBnseqsKurKcsNqCEFeGL3uLpVChpIO3QfQ==}
+    peerDependencies:
+      react: ^19.0.0
+
+  react@19.0.0:
+    resolution: {integrity: sha512-V8AVnmPIICiWpGfm6GLzCR/W5FXLchHop40W4nXBmdlEceh16rCN8O8LNWm5bh5XUX91fh7KpA+W0TgMKmgTpQ==}
+    engines: {node: '>=0.10.0'}
+
   read-cache@1.0.0:
     resolution: {integrity: sha512-Owdv/Ft7IjOgm/i0xvNDZ1LrRANRfew4b2prF3OWMQLxLfu3bS8FVhCsrSCMK4lR56Y9ya+AThoTpDCTxCmpRA==}
 
@@ -2534,6 +2553,9 @@ packages:
 
   sax@1.2.4:
     resolution: {integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==}
+
+  scheduler@0.25.0:
+    resolution: {integrity: sha512-xFVuu11jh+xcO7JOAGJNOXld8/TcEHK/4CituBUeUb5hqxJLj9YuemAEuvm9gQ/+pgXYfbQuqAkiYu+u7YEsNA==}
 
   scslre@0.3.0:
     resolution: {integrity: sha512-3A6sD0WYP7+QrjbfNA2FN3FsOaGGFoekCVgTyypy53gPxhbkCIjtO6YWgdrfM+n/8sI8JeXZOIxsHjMTNxQ4nQ==}
@@ -3033,7 +3055,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@antfu/eslint-config@4.3.0(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))':
+  '@antfu/eslint-config@4.3.0(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)':
     dependencies:
       '@antfu/install-pkg': 1.0.0
       '@clack/prompts': 0.10.0
@@ -3042,7 +3064,7 @@ snapshots:
       '@stylistic/eslint-plugin': 4.0.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       '@typescript-eslint/eslint-plugin': 8.24.1(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       '@typescript-eslint/parser': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
-      '@vitest/eslint-plugin': 1.1.31(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))
+      '@vitest/eslint-plugin': 1.1.31(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)
       ansis: 3.16.0
       cac: 6.7.14
       eslint: 9.20.1(jiti@2.4.2)
@@ -3679,6 +3701,12 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  '@tanstack/react-table@8.21.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      '@tanstack/table-core': 8.21.2
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
   '@tanstack/table-core@8.21.2': {}
 
   '@tanstack/virtual-core@3.13.0': {}
@@ -3837,7 +3865,7 @@ snapshots:
       vite: 6.1.1(@types/node@22.13.5)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0)
       vue: 3.5.13(typescript@5.7.3)
 
-  '@vitest/eslint-plugin@1.1.31(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))':
+  '@vitest/eslint-plugin@1.1.31(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)':
     dependencies:
       '@typescript-eslint/utils': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.20.1(jiti@2.4.2)
@@ -5663,6 +5691,13 @@ snapshots:
       defu: 6.1.4
       destr: 2.0.3
 
+  react-dom@19.0.0(react@19.0.0):
+    dependencies:
+      react: 19.0.0
+      scheduler: 0.25.0
+
+  react@19.0.0: {}
+
   read-cache@1.0.0:
     dependencies:
       pify: 2.3.0
@@ -5779,6 +5814,8 @@ snapshots:
 
   sax@1.2.4: {}
 
+  scheduler@0.25.0: {}
+
   scslre@0.3.0:
     dependencies:
       '@eslint-community/regexpp': 4.12.1
@@ -5793,7 +5830,7 @@ snapshots:
 
   semver@7.7.1: {}
 
-  shadcn-vue@1.0.0(@vitest/ui@3.0.6(vitest@3.0.6))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))(vue@3.5.13(typescript@5.7.3)):
+  shadcn-vue@1.0.0(@vitest/ui@3.0.6)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)(vue@3.5.13(typescript@5.7.3)):
     dependencies:
       '@unovue/detypes': 0.8.4
       '@vitest/ui': 3.0.6(vitest@3.0.6)

@@ -181,6 +181,7 @@ onMounted(() => {
             h('code', JSON.stringify(row.original, null, 2)),
           ])"
           style="height: 100%; max-height: 600px;"
+          :scroll-x="1920"
         />
 
         <DataTablePagination

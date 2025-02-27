@@ -18,13 +18,14 @@ const props = withDefaults(defineProps<DataTableProps<TData>>(), {
   class: '',
   flexHeight: false,
   size: 'default',
+  scrollX: undefined,
 })
 
 const emits = defineEmits<{
   scroll: [e: Event]
 }>()
 
-const { renderExpanded, flexHeight } = toRefs(props)
+const { renderExpanded, flexHeight, scrollX } = toRefs(props)
 
 const isStickyLayout = computed(() => flexHeight.value)
 
@@ -65,8 +66,22 @@ const vScrollSync: Directive<HTMLDivElement> = {
     }
 
     const updateScrollbarGutter = () => {
+      // 檢查是否存在垂直滾動條
       const hasScrollbar = bodyContainer.scrollHeight > bodyContainer.clientHeight
-      headerContainer.style.scrollbarGutter = hasScrollbar ? 'stable' : ''
+
+      if (hasScrollbar) {
+        // 計算 bodyContainer 的滾動條寬度
+        const containerWidth = bodyContainer.offsetWidth
+        const contentWidth = bodyContainer.clientWidth
+        const scrollbarWidth = containerWidth - contentWidth
+
+        // 應用 padding-right 來保留滾動條空間
+        headerContainer.style.paddingRight = `${scrollbarWidth}px`
+      }
+      else {
+        // 如果沒有滾動條，則移除 padding-right
+        headerContainer.style.paddingRight = '0px'
+      }
     }
 
     // 立即執行一次更新
@@ -141,6 +156,7 @@ export interface DataTableProps<TData> {
   renderExpanded?: (row: Row<TData>, rowIndex: number) => VNodeChild
   flexHeight?: boolean
   size?: DataTableVariants['size']
+  scrollX?: number
 }
 </script>
 
@@ -202,9 +218,10 @@ export interface DataTableProps<TData> {
     <div
       v-scroll-sync
       class="overflow-hidden rounded-md border"
+      :style="{ '--min-width': scrollX && `${scrollX}px` }"
     >
       <div class="relative w-full overflow-x-hidden">
-        <table :class="cn('w-full caption-bottom text-sm table-fixed')">
+        <table :class="cn('w-full caption-bottom text-sm table-fixed', [scrollX && 'min-w-[var(--min-width)]'])">
           <component :is="renderColGroup" />
           <TableHeader
             v-for="headerGroup of table.getHeaderGroups()"
@@ -230,46 +247,56 @@ export interface DataTableProps<TData> {
           </TableHeader>
         </table>
       </div>
-      <Table
-        :class="cn('table-fixed')"
-        :style="{
-          ...props.style,
-        }"
+      <div
+        :class="cn(
+          'relative w-full overflow-auto',
+        )"
+        :style="{ ...props.style }"
         @scroll="(e: Event) => emits('scroll', e)"
       >
-        <component :is="renderColGroup" />
-        <TableBody>
-          <template v-if="table.getRowModel().rows?.length">
-            <template v-for="(row, idx) of table.getRowModel().rows" :key="row.id">
-              <TableRow :data-state="row.getIsSelected() && 'selected'">
-                <TableCell
-                  v-for="cell of row.getVisibleCells()"
-                  v-bind="{
-                    ...(cell.column.columnDef.meta?.cellProps?.(row, idx) ?? {}),
-                  }"
-                  :key="cell.id"
-                  :class="cn(dataTableVariants({ size: props.size }))"
-                  :style="{
-                    ...getCommonPinningStyles({ column: cell.column, withBorder: true }),
-                  }"
-                >
-                  <FlexRender
-                    :render="cell.column.columnDef.cell"
-                    :props="cell.getContext()"
-                  />
-                </TableCell>
-              </TableRow>
-              <TableRow v-if="row.getIsExpanded() && !!renderExpanded">
-                <TableCell :colspan="row.getAllCells().length" :class="cn(dataTableVariants({ size: props.size }))">
-                  <component :is="renderExpanded(row, idx)" />
-                </TableCell>
-              </TableRow>
+        <table
+          :class="cn(
+            'w-full caption-bottom text-sm',
+            'table-fixed',
+            [scrollX && 'min-w-[var(--min-width)]'],
+          )"
+        >
+          <component :is="renderColGroup" />
+          <TableBody>
+            <template v-if="table.getRowModel().rows?.length">
+              <template v-for="(row, idx) of table.getRowModel().rows" :key="row.id">
+                <TableRow :data-state="row.getIsSelected() && 'selected'">
+                  <TableCell
+                    v-for="cell of row.getVisibleCells()"
+                    v-bind="{
+                      ...(cell.column.columnDef.meta?.cellProps?.(row, idx) ?? {}),
+                    }"
+                    :key="cell.id"
+                    :class="cn(dataTableVariants({ size: props.size }))"
+                    :style="{
+                      ...getCommonPinningStyles({ column: cell.column, withBorder: true }),
+                    }"
+                  >
+                    <FlexRender
+                      :render="cell.column.columnDef.cell"
+                      :props="cell.getContext()"
+                    />
+                  </TableCell>
+                </TableRow>
+                <TableRow v-if="row.getIsExpanded() && !!renderExpanded">
+                  <TableCell :colspan="row.getAllCells().length" :class="cn(dataTableVariants({ size: props.size }))">
+                    <component :is="renderExpanded(row, idx)" />
+                  </TableCell>
+                </TableRow>
+              </template>
             </template>
-          </template>
-        </TableBody>
-      </Table>
+          </TableBody>
+        </table>
+      </div>
     </div>
   </template>
 </template>
 
-<style scoped></style>
+<style scoped>
+
+</style>
