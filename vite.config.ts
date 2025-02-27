@@ -5,6 +5,7 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import autoprefixer from 'autoprefixer'
 import tailwind from 'tailwindcss'
 import { defineConfig } from 'vite'
+import dts from 'vite-plugin-dts'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -15,7 +16,14 @@ export default defineConfig({
       plugins: [tailwind(), autoprefixer()],
     },
   },
-  plugins: [vueJsx(), vue()],
+  plugins: [
+    vueJsx(),
+    vue(),
+    dts({
+      include: ['src'],
+      insertTypesEntry: true,
+    }),
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -29,10 +37,11 @@ export default defineConfig({
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
-      external: ['vue'],
+      external: ['vue', '@tanstack/vue-table'],
       output: {
         globals: {
-          vue: 'Vue',
+          'vue': 'Vue',
+          '@tanstack/vue-table': 'VueTable',
         },
       },
     },
