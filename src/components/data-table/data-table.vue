@@ -1,13 +1,16 @@
 <script setup lang="tsx" generic="TData">
+import type { PinningStyleOptions } from '@/utils/data-table'
 import type { Row, Table as TanstackTable } from '@tanstack/vue-table'
 import type { CSSProperties, Directive, HTMLAttributes, VNodeChild } from 'vue'
 import type { DataTableVariants } from '.'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
-import { getCommonPinningStyles } from '@/utils/data-table'
 import { FlexRender } from '@tanstack/vue-table'
 import { computed, toRefs } from 'vue'
 import { dataTableVariants } from '.'
+import { getCommonPinningStyles } from '../../utils/data-table'
+import { toCssVarName } from '../../utils/themes'
+import { omit, pick } from '../../utils/utils'
 
 defineOptions({
   name: 'DataTable',
@@ -19,15 +22,40 @@ const props = withDefaults(defineProps<DataTableProps<TData>>(), {
   flexHeight: false,
   size: 'default',
   scrollX: undefined,
+  rowClassName: undefined,
+  rowProps: undefined,
+  pinningOptions: undefined,
+  themeOverrides: () => ({
+    thColor: 'rgba(250, 250, 252, 1)',
+    thColorHover: 'rgba(243, 243, 247, 1)',
+    tdColor: '#fff',
+    tdColorHover: 'rgba(247, 247, 250, 1)',
+  }),
 })
 
 const emits = defineEmits<{
   scroll: [e: Event]
 }>()
 
-const { renderExpanded, flexHeight, scrollX } = toRefs(props)
+const { renderExpanded, flexHeight, scrollX, rowClassName, rowProps, pinningOptions, themeOverrides } = toRefs(props)
 
 const isStickyLayout = computed(() => flexHeight.value)
+
+const tableStyles = computed(() => {
+  const result: Record<string, string> = {}
+
+  for (const key in themeOverrides.value) {
+    if (Object.prototype.hasOwnProperty.call(themeOverrides.value, key)) {
+      const value = themeOverrides.value[key as keyof ThemeOverrides]
+      if (value !== undefined) {
+        const cssVarName = toCssVarName(key)
+        result[cssVarName] = value
+      }
+    }
+  }
+
+  return result as CSSProperties
+})
 
 function renderColGroup() {
   return (
@@ -38,6 +66,14 @@ function renderColGroup() {
     </colgroup>
   )
 }
+
+const rowAttrs = computed(() => (row: Row<TData>, rowIndex: number) => {
+  const className = rowClassName.value ? typeof rowClassName.value === 'string' ? rowClassName.value : rowClassName.value(row, rowIndex) : undefined
+  return {
+    class: className,
+    ...(rowProps.value?.(row, rowIndex) ?? {}),
+  }
+})
 
 /** */
 interface ScrollSyncState {
@@ -157,6 +193,19 @@ export interface DataTableProps<TData> {
   flexHeight?: boolean
   size?: DataTableVariants['size']
   scrollX?: number
+  rowClassName?: string | ((row: Row<TData>, rowIndex: number) => string)
+  rowProps?: (row: Row<TData>, rowIndex: number) => HTMLAttributes
+  // pinning 樣式配置
+  pinningOptions?: Omit<PinningStyleOptions, 'isSelected'>
+  //
+  themeOverrides?: ThemeOverrides
+}
+
+export interface ThemeOverrides {
+  tdColor?: string
+  tdColorHover?: string
+  thColor?: string
+  thColorHover?: string
 }
 </script>
 
@@ -175,7 +224,10 @@ export interface DataTableProps<TData> {
               :key="header.id"
               :col-span="header.colSpan"
               :style="{
-                ...getCommonPinningStyles({ column: header.column, withBorder: true }),
+                ...getCommonPinningStyles({
+                  column: header.column,
+                  options: pinningOptions,
+                }),
               }"
             >
               <FlexRender
@@ -189,12 +241,19 @@ export interface DataTableProps<TData> {
         <TableBody>
           <template v-if="table.getRowModel().rows?.length">
             <template v-for="(row, idx) of table.getRowModel().rows" :key="row.id">
-              <TableRow :data-state="row.getIsSelected() && 'selected'">
+              <TableRow
+                v-bind="rowAttrs(row, idx)"
+                :data-state="row.getIsSelected() && 'selected'"
+                :class="cn('group', 'data-[state=selected]:bg-transparent')"
+              >
                 <TableCell
                   v-for="cell of row.getVisibleCells()"
                   :key="cell.id"
                   :style="{
-                    ...getCommonPinningStyles({ column: cell.column, withBorder: true }),
+                    ...getCommonPinningStyles({
+                      column: cell.column,
+                      options: pinningOptions,
+                    }),
                   }"
                 >
                   <FlexRender
@@ -218,9 +277,13 @@ export interface DataTableProps<TData> {
     <div
       v-scroll-sync
       class="overflow-hidden rounded-md border"
-      :style="{ '--min-width': scrollX && `${scrollX}px` }"
+      :style="{
+        '--min-width': scrollX && `${scrollX}px`,
+        ...omit(props.style || {}, ['height', 'min-height', 'max-height']),
+        ...tableStyles,
+      }"
     >
-      <div class="relative w-full overflow-x-hidden">
+      <div class="relative w-full overflow-x-hidden bg-[var(--th-color)]">
         <table :class="cn('w-full caption-bottom text-sm table-fixed', [scrollX && 'min-w-[var(--min-width)]'])">
           <component :is="renderColGroup" />
           <TableHeader
@@ -232,9 +295,9 @@ export interface DataTableProps<TData> {
                 v-for="header of headerGroup.headers"
                 :key="header.id"
                 :colspan="header.colSpan"
-                :class="cn(dataTableVariants({ size: props.size }))"
+                :class="cn(dataTableVariants({ size: props.size }), 'bg-[var(--th-color)]')"
                 :style="{
-                  ...getCommonPinningStyles({ column: header.column, withBorder: true }),
+                  ...getCommonPinningStyles({ column: header.column, options: pinningOptions }),
                 }"
               >
                 <FlexRender
@@ -248,10 +311,8 @@ export interface DataTableProps<TData> {
         </table>
       </div>
       <div
-        :class="cn(
-          'relative w-full overflow-auto',
-        )"
-        :style="{ ...props.style }"
+        :class="cn('relative w-full overflow-auto')"
+        :style="{ ...pick(props.style || {}, ['height', 'min-height', 'max-height']) }"
         @scroll="(e: Event) => emits('scroll', e)"
       >
         <table
@@ -265,16 +326,23 @@ export interface DataTableProps<TData> {
           <TableBody>
             <template v-if="table.getRowModel().rows?.length">
               <template v-for="(row, idx) of table.getRowModel().rows" :key="row.id">
-                <TableRow :data-state="row.getIsSelected() && 'selected'">
+                <TableRow
+                  v-bind="rowAttrs(row, idx)"
+                  :data-state="row.getIsSelected() && 'selected'"
+                  :class="cn('group', 'data-[state=selected]:bg-transparent')"
+                >
                   <TableCell
                     v-for="cell of row.getVisibleCells()"
                     v-bind="{
                       ...(cell.column.columnDef.meta?.cellProps?.(row, idx) ?? {}),
                     }"
                     :key="cell.id"
-                    :class="cn(dataTableVariants({ size: props.size }))"
+                    :class="cn(dataTableVariants({ size: props.size }), 'bg-[var(--td-color)]', 'group-hover:bg-[--td-color-hover]')"
                     :style="{
-                      ...getCommonPinningStyles({ column: cell.column, withBorder: true }),
+                      ...getCommonPinningStyles({
+                        column: cell.column,
+                        options: pinningOptions,
+                      }),
                     }"
                   >
                     <FlexRender
