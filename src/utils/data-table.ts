@@ -12,7 +12,6 @@ interface Common {
 export interface PinningStyleOptions extends Common {
   // 是否顯示邊界陰影
   withBorder?: boolean
-  isSelected?: boolean
 }
 
 export function getCommonPinningStyles<TData>({

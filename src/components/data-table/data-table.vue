@@ -11,6 +11,7 @@ import { dataTableVariants } from '.'
 import { getCommonPinningStyles } from '../../utils/data-table'
 import { toCssVarName } from '../../utils/themes'
 import { omit, pick } from '../../utils/utils'
+import { LoadingRow } from './loading-row'
 
 defineOptions({
   name: 'DataTable',
@@ -31,15 +32,21 @@ const props = withDefaults(defineProps<DataTableProps<TData>>(), {
     tdColor: '#fff',
     tdColorHover: 'rgba(247, 247, 250, 1)',
   }),
+  loading: false,
 })
 
 const emits = defineEmits<{
   scroll: [e: Event]
 }>()
 
-const { renderExpanded, flexHeight, scrollX, rowClassName, rowProps, pinningOptions, themeOverrides } = toRefs(props)
+defineSlots<{
+  empty: () => any
+}>()
+
+const { renderExpanded, flexHeight, scrollX, rowClassName, rowProps, pinningOptions, themeOverrides, loading } = toRefs(props)
 
 const isStickyLayout = computed(() => flexHeight.value)
+const isEmpty = computed(() => !props.table.getCoreRowModel().rows?.length)
 
 const tableStyles = computed(() => {
   const result: Record<string, string> = {}
@@ -196,9 +203,11 @@ export interface DataTableProps<TData> {
   rowClassName?: string | ((row: Row<TData>, rowIndex: number) => string)
   rowProps?: (row: Row<TData>, rowIndex: number) => HTMLAttributes
   // pinning 樣式配置
-  pinningOptions?: Omit<PinningStyleOptions, 'isSelected'>
+  pinningOptions?: PinningStyleOptions
   //
   themeOverrides?: ThemeOverrides
+  //
+  loading?: boolean
 }
 
 export interface ThemeOverrides {
@@ -223,12 +232,7 @@ export interface ThemeOverrides {
               v-for="header of headerGroup.headers"
               :key="header.id"
               :col-span="header.colSpan"
-              :style="{
-                ...getCommonPinningStyles({
-                  column: header.column,
-                  options: pinningOptions,
-                }),
-              }"
+              :style="getCommonPinningStyles({ column: header.column, options: pinningOptions })"
             >
               <FlexRender
                 v-if="!header.isPlaceholder"
@@ -296,9 +300,7 @@ export interface ThemeOverrides {
                 :key="header.id"
                 :colspan="header.colSpan"
                 :class="cn(dataTableVariants({ size: props.size }), 'bg-[var(--th-color)]')"
-                :style="{
-                  ...getCommonPinningStyles({ column: header.column, options: pinningOptions }),
-                }"
+                :style="getCommonPinningStyles({ column: header.column, options: pinningOptions })"
               >
                 <FlexRender
                   v-if="!header.isPlaceholder"
@@ -315,51 +317,68 @@ export interface ThemeOverrides {
         :style="{ ...pick(props.style || {}, ['height', 'min-height', 'max-height']) }"
         @scroll="(e: Event) => emits('scroll', e)"
       >
-        <table
-          :class="cn(
-            'w-full caption-bottom text-sm',
-            'table-fixed',
-            [scrollX && 'min-w-[var(--min-width)]'],
-          )"
-        >
-          <component :is="renderColGroup" />
-          <TableBody>
-            <template v-if="table.getRowModel().rows?.length">
-              <template v-for="(row, idx) of table.getRowModel().rows" :key="row.id">
-                <TableRow
-                  v-bind="rowAttrs(row, idx)"
-                  :data-state="row.getIsSelected() && 'selected'"
-                  :class="cn('group', 'data-[state=selected]:bg-transparent')"
-                >
-                  <TableCell
-                    v-for="cell of row.getVisibleCells()"
-                    v-bind="{
-                      ...(cell.column.columnDef.meta?.cellProps?.(row, idx) ?? {}),
-                    }"
-                    :key="cell.id"
-                    :class="cn(dataTableVariants({ size: props.size }), 'bg-[var(--td-color)]', 'group-hover:bg-[--td-color-hover]')"
-                    :style="{
-                      ...getCommonPinningStyles({
-                        column: cell.column,
-                        options: pinningOptions,
-                      }),
-                    }"
+        <template v-if="loading">
+          <table
+            :class="cn('w-full caption-bottom text-sm', 'table-fixed')"
+          >
+            <component :is="renderColGroup" />
+            <TableBody>
+              <LoadingRow
+                v-for="(_, i) of Array.from({ length: 10 })"
+                :key="i"
+                class="hover:bg-transparent"
+                :columns="props.table.getAllLeafColumns()"
+                :size="props.size"
+                :pinning-options="pinningOptions"
+              />
+            </TableBody>
+          </table>
+        </template>
+        <template v-else-if="isEmpty">
+          <div class="w-full h-full relative">
+            <slot name="empty" />
+          </div>
+        </template>
+        <template v-else>
+          <table
+            :class="cn(
+              'w-full caption-bottom text-sm',
+              'table-fixed',
+              [scrollX && 'min-w-[var(--min-width)]'],
+            )"
+          >
+            <component :is="renderColGroup" />
+            <TableBody>
+              <template v-if="table.getRowModel().rows?.length">
+                <template v-for="(row, idx) of table.getRowModel().rows" :key="row.id">
+                  <TableRow
+                    v-bind="rowAttrs(row, idx)"
+                    :data-state="row.getIsSelected() && 'selected'"
+                    :class="cn('group', 'data-[state=selected]:bg-transparent')"
                   >
-                    <FlexRender
-                      :render="cell.column.columnDef.cell"
-                      :props="cell.getContext()"
-                    />
-                  </TableCell>
-                </TableRow>
-                <TableRow v-if="row.getIsExpanded() && !!renderExpanded">
-                  <TableCell :colspan="row.getAllCells().length" :class="cn(dataTableVariants({ size: props.size }))">
-                    <component :is="renderExpanded(row, idx)" />
-                  </TableCell>
-                </TableRow>
+                    <TableCell
+                      v-for="cell of row.getVisibleCells()"
+                      :key="cell.id"
+                      v-bind="(cell.column.columnDef.meta?.cellProps?.(row, idx) ?? {})"
+                      :class="cn(dataTableVariants({ size: props.size }), 'bg-[var(--td-color)]', 'group-hover:bg-[--td-color-hover]')"
+                      :style="getCommonPinningStyles({ column: cell.column, options: pinningOptions })"
+                    >
+                      <FlexRender
+                        :render="cell.column.columnDef.cell"
+                        :props="cell.getContext()"
+                      />
+                    </TableCell>
+                  </TableRow>
+                  <TableRow v-if="row.getIsExpanded() && !!renderExpanded">
+                    <TableCell :colspan="row.getAllCells().length" :class="cn(dataTableVariants({ size: props.size }))">
+                      <component :is="renderExpanded(row, idx)" />
+                    </TableCell>
+                  </TableRow>
+                </template>
               </template>
-            </template>
-          </TableBody>
-        </table>
+            </TableBody>
+          </table>
+        </template>
       </div>
     </div>
   </template>

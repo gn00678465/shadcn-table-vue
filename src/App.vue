@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ColumnDef, Row } from '@tanstack/vue-table'
-import { DataTable, DataTablePagination, DataTableSkeleton, DataTableViewOptions } from '@/components/data-table'
+import { DataTable, DataTablePagination, DataTableViewOptions } from '@/components/data-table'
 import { useDataTable } from '@/composables/use-data-table'
 import { faker } from '@faker-js/faker/locale/zh_TW'
 import { h, onMounted, ref } from 'vue'
@@ -165,41 +165,40 @@ onMounted(() => {
 
 <template>
   <div class="container mx-auto py-10">
-    <template v-if="!currentData.length && loading">
-      <DataTableSkeleton :column-count="columns.length" :row-count="2" />
-    </template>
-
-    <template v-else>
-      <div>
-        <div class="flex">
-          <DataTableViewOptions :table="table" />
+    <div class="flex">
+      <DataTableViewOptions :table="table" />
+    </div>
+    <DataTable
+      :loading="loading"
+      :table="table"
+      :flex-height="true"
+      :render-expanded="(row) => h('pre', { style: 'fontSize: 10px' }, [
+        h('code', JSON.stringify(row.original, null, 2)),
+      ])"
+      style="max-height: 100%; height: 600px;"
+      :scroll-x="1600"
+      :pinning-options="{
+        withBorder: true,
+      }"
+    >
+      <template #empty>
+        <div class="text-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          Empty
         </div>
-        <DataTable
-          :table="table"
-          :flex-height="true"
-          :render-expanded="(row) => h('pre', { style: 'fontSize: 10px' }, [
-            h('code', JSON.stringify(row.original, null, 2)),
-          ])"
-          style="height: 100%; max-height: 600px;"
-          :scroll-x="1600"
-          :pinning-options="{
-            withBorder: true,
-          }"
-        />
+      </template>
+    </DataTable>
 
-        <DataTablePagination
-          :table="table"
-          :page="pagination.pageIndex"
-          :page-count="pagination.pageCount"
-          :page-size="pagination.pageSize"
-          size="sm"
-          :item-count="pagination.itemCount"
-        >
-          <template #prefix="props">
-            <span>{{ `${props.startIndex}`.padStart(2, '0') }} of {{ `${props.endIndex}`.padStart(2, '0') }}</span>
-          </template>
-        </DataTablePagination>
-      </div>
-    </template>
+    <DataTablePagination
+      :table="table"
+      :page="pagination.pageIndex"
+      :page-count="pagination.pageCount"
+      :page-size="pagination.pageSize"
+      size="sm"
+      :item-count="pagination.itemCount"
+    >
+      <template #prefix="props">
+        <span>{{ `${props.startIndex}`.padStart(2, '0') }} of {{ `${props.endIndex}`.padStart(2, '0') }}</span>
+      </template>
+    </DataTablePagination>
   </div>
 </template>
