@@ -1,4 +1,4 @@
-<script setup lang="tsx" generic="TData">
+<script setup lang="ts" generic="TData">
 import type { PinningStyleOptions } from '@/utils/data-table'
 import type { Row, Table as TanstackTable } from '@tanstack/vue-table'
 import type { CSSProperties, Directive, HTMLAttributes, VNodeChild } from 'vue'
@@ -6,7 +6,7 @@ import type { DataTableVariants } from '.'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import { FlexRender } from '@tanstack/vue-table'
-import { computed, toRefs } from 'vue'
+import { computed, h, toRefs } from 'vue'
 import { dataTableVariants } from '.'
 import { getCommonPinningStyles } from '../../utils/data-table'
 import { toCssVarName } from '../../utils/themes'
@@ -65,13 +65,11 @@ const tableStyles = computed(() => {
 })
 
 function renderColGroup() {
-  return (
-    <colgroup>
-      {props.table.getAllLeafColumns().map((column) => {
-        return <col width={column.getSize() === 150 ? undefined : column.getSize()} />
-      })}
-    </colgroup>
-  )
+  return h('colgroup', {}, props.table.getAllLeafColumns().map((column) => {
+    return h('col', {
+      width: column.getSize() === 150 ? undefined : column.getSize(),
+    })
+  }))
 }
 
 const rowAttrs = computed(() => (row: Row<TData>, rowIndex: number) => {
@@ -186,7 +184,7 @@ const vScrollSync: Directive<HTMLDivElement> = {
 }
 </script>
 
-<script lang="tsx">
+<script lang="ts">
 export interface DataTableProps<TData> {
   /**
    * The table instance returned from useDataTable hook with pagination, sorting, filtering, etc.
