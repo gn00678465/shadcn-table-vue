@@ -5,7 +5,6 @@ interface Common {
   boxShadow?: string
   opacity?: number
   zIndex?: number
-  background?: string
   additionalStyles?: CSSProperties
 }
 
@@ -55,7 +54,6 @@ export function getCommonPinningStyles<TData>({
 
     boxShadow: common.boxShadow ?? defaultBoxShadow,
     opacity: isPinned ? common.opacity : 1,
-    background: isPinned ? common.background : '',
     zIndex: isPinned ? zIndex : 0,
   }
 
