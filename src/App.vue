@@ -164,41 +164,82 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container mx-auto py-10">
-    <div class="flex">
-      <DataTableViewOptions :table="table" />
+  <div class="container mx-auto py-10 space-y-10">
+    <div>
+      <h2 class="text-xl">
+        Table(Normal)
+      </h2>
+      <div class="flex">
+        <DataTableViewOptions :table="table" />
+      </div>
+      <DataTable
+        :loading="loading"
+        :table="table"
+        :render-expanded="(row) => h('pre', { style: 'fontSize: 10px' }, [
+          h('code', JSON.stringify(row.original, null, 2)),
+        ])"
+        :scroll-x="1920"
+        :pinning-options="{
+          withBorder: true,
+        }"
+      >
+        <template #empty>
+          <div class="text-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            Empty
+          </div>
+        </template>
+      </DataTable>
+      <DataTablePagination
+        :table="table"
+        :page="pagination.pageIndex"
+        :page-count="pagination.pageCount"
+        :page-size="pagination.pageSize"
+        size="sm"
+        :item-count="pagination.itemCount"
+      >
+        <template #prefix="props">
+          <span>{{ `${props.startIndex}`.padStart(2, '0') }} of {{ `${props.endIndex}`.padStart(2, '0') }}</span>
+        </template>
+      </DataTablePagination>
     </div>
-    <DataTable
-      :loading="loading"
-      :table="table"
-      :flex-height="true"
-      :render-expanded="(row) => h('pre', { style: 'fontSize: 10px' }, [
-        h('code', JSON.stringify(row.original, null, 2)),
-      ])"
-      style="max-height: 100%; height: 600px;"
-      :scroll-x="1600"
-      :pinning-options="{
-        withBorder: true,
-      }"
-    >
-      <template #empty>
-        <div class="text-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          Empty
-        </div>
-      </template>
-    </DataTable>
-
-    <DataTablePagination
-      :table="table"
-      :page="pagination.pageIndex"
-      :page-count="pagination.pageCount"
-      :page-size="pagination.pageSize"
-      size="sm"
-      :item-count="pagination.itemCount"
-    >
-      <template #prefix="props">
-        <span>{{ `${props.startIndex}`.padStart(2, '0') }} of {{ `${props.endIndex}`.padStart(2, '0') }}</span>
-      </template>
-    </DataTablePagination>
+    <div>
+      <h2 class="text-xl">
+        Table(Flex height)
+      </h2>
+      <div class="flex">
+        <DataTableViewOptions :table="table" />
+      </div>
+      <DataTable
+        :loading="loading"
+        :table="table"
+        :flex-height="true"
+        :render-expanded="(row) => h('pre', { style: 'fontSize: 10px' }, [
+          h('code', JSON.stringify(row.original, null, 2)),
+        ])"
+        style="max-height: 100%; height: 600px;"
+        :scroll-x="1920"
+        :pinning-options="{
+          withBorder: true,
+        }"
+      >
+        <template #empty>
+          <div class="text-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            Empty
+          </div>
+        </template>
+      </DataTable>
+      <DataTablePagination
+        :table="table"
+        :page="pagination.pageIndex"
+        :page-count="pagination.pageCount"
+        :page-size="pagination.pageSize"
+        size="sm"
+        :item-count="pagination.itemCount"
+      >
+        <template #prefix="props">
+          <span>{{ `${props.startIndex}`.padStart(2, '0') }} of {{ `${props.endIndex}`.padStart(2, '0') }}</span>
+        </template>
+      </DataTablePagination>
+    </div>
   </div>
 </template>

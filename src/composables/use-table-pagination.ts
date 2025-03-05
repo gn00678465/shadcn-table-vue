@@ -1,8 +1,8 @@
 import type { OnChangeFn, PaginationState, TableOptions } from '@tanstack/vue-table'
-import type { ComputedRef, Ref } from 'vue'
-import { valueUpdater } from '@/lib/utils'
+import type { ComputedRef, MaybeRefOrGetter, Ref } from 'vue'
 import { getPaginationRowModel } from '@tanstack/vue-table'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, toValue, watch } from 'vue'
+import { valueUpdater } from '../lib/utils'
 
 export interface TablePaginationOptions {
   /**
@@ -19,7 +19,7 @@ export interface TablePaginationOptions {
   /**
    * 遠程數據總數
    */
-  itemCount?: number
+  itemCount?: MaybeRefOrGetter<number>
   /**
    * 分頁變更回調
    */
@@ -75,7 +75,7 @@ export function useTablePagination<TData>(options: TablePaginationOptions = {}):
   }
 
   // 計算總頁數
-  const itemCount = computed(() => options.itemCount ?? 0)
+  const itemCount = computed(() => toValue(options.itemCount) ?? 0)
   const pageCount = computed(() => {
     return Math.ceil(itemCount.value / pagination.value.pageSize)
   })

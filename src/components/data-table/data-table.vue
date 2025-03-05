@@ -65,7 +65,7 @@ const tableStyles = computed(() => {
 })
 
 function renderColGroup() {
-  return h('colgroup', {}, props.table.getAllLeafColumns().map((column) => {
+  return h('colgroup', {}, props.table.getVisibleLeafColumns().map((column) => {
     return h('col', {
       width: column.getSize() === 150 ? undefined : column.getSize(),
     })

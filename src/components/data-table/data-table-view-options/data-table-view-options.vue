@@ -1,6 +1,7 @@
 <script setup lang="ts" generic="TData">
+import type { ButtonVariants } from '@/components/ui/button'
 import type { Column, Table } from '@tanstack/vue-table'
-import type { VNodeChild } from 'vue'
+import type { HTMLAttributes, VNodeChild } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -25,6 +26,11 @@ defineOptions({
 const props = withDefaults(defineProps<DataTableViewOptionsProps<TData>>(), {
   renderTrigger: undefined,
   renderLabel: undefined,
+  triggerProps: () => ({
+    size: 'sm',
+    variant: 'outline',
+    class: '',
+  }),
 })
 
 const slots = defineSlots<{
@@ -43,6 +49,7 @@ export interface DataTableViewOptionsProps<TData> {
   table: Table<TData>
   renderLabel?: (col: Column<TData>) => VNodeChild
   renderCheckbox?: (value: boolean | 'indeterminate') => VNodeChild
+  triggerProps?: ButtonVariants & { class?: HTMLAttributes['class'] }
 }
 </script>
 
@@ -55,8 +62,8 @@ export interface DataTableViewOptionsProps<TData> {
         variant="outline"
         role="combobox"
         size="sm"
-        class="ml-auto hidden h-8 gap-2 focus:outline-none focus:ring-1 focus:ring-ring focus-visible:ring-0 lg:inline-flex"
-        :as-child="!!slots.trigger"
+        class="hidden gap-2 focus:outline-none focus:ring-1 focus:ring-ring focus-visible:ring-0 lg:inline-flex"
+        v-bind="props.triggerProps"
       >
         <template v-if="!slots.trigger">
           <Settings2 class="size-4" />
