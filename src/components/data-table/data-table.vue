@@ -3,6 +3,7 @@ import type { PinningStyleOptions } from '@/utils/data-table'
 import type { Row, Table as TanstackTable } from '@tanstack/vue-table'
 import type { CSSProperties, Directive, HTMLAttributes, VNodeChild } from 'vue'
 import type { DataTableVariants } from '.'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import { FlexRender } from '@tanstack/vue-table'
@@ -34,10 +35,6 @@ const props = withDefaults(defineProps<DataTableProps<TData>>(), {
   }),
   loading: false,
 })
-
-const emits = defineEmits<{
-  scroll: [e: Event]
-}>()
 
 defineSlots<{
   empty: () => any
@@ -85,9 +82,6 @@ interface ScrollSyncState {
   headerContainer: HTMLElement | null
   bodyContainer: HTMLElement | null
   handleScroll: () => void
-  updateScrollbarGutter: () => void
-  resizeObserver: ResizeObserver
-  handleResize: () => void
 }
 const stateMap = new WeakMap<HTMLElement, ScrollSyncState>()
 
@@ -95,7 +89,7 @@ const vScrollSync: Directive<HTMLDivElement> = {
   mounted(el, binding) {
     // 設置選擇器，默認選擇第一個和第二個直接子元素
     const headerSelector = ':scope > div:first-child'
-    const bodySelector = ':scope > div:last-child'
+    const bodySelector = ':scope > div:last-child > div:first-child'
 
     // 獲取容器元素
     const headerContainer = el.querySelector(headerSelector) as HTMLElement
@@ -105,43 +99,6 @@ const vScrollSync: Directive<HTMLDivElement> = {
       console.warn('v-sync-horizontal-scroll: Could not find header or body container')
       return
     }
-
-    const updateScrollbarGutter = () => {
-      // 檢查是否存在垂直滾動條
-      const hasScrollbar = bodyContainer.scrollHeight > bodyContainer.clientHeight
-
-      if (hasScrollbar) {
-        // 計算 bodyContainer 的滾動條寬度
-        const containerWidth = bodyContainer.offsetWidth
-        const contentWidth = bodyContainer.clientWidth
-        const scrollbarWidth = containerWidth - contentWidth
-
-        // 應用 padding-right 來保留滾動條空間
-        headerContainer.style.paddingRight = `${scrollbarWidth}px`
-      }
-      else {
-        // 如果沒有滾動條，則移除 padding-right
-        headerContainer.style.paddingRight = '0px'
-      }
-    }
-
-    // 立即執行一次更新
-    updateScrollbarGutter()
-
-    // 使用 ResizeObserver 監聽表體容器大小變化
-    const resizeObserver = new ResizeObserver(() => {
-      updateScrollbarGutter()
-    })
-
-    // 獲取表體容器並開始觀察
-    const bodyTable = el.querySelectorAll('table')[1]
-    if (bodyTable && bodyTable.parentElement) {
-      resizeObserver.observe(bodyTable.parentElement)
-    }
-
-    // 同時監聽窗口大小變化
-    const handleResize = () => updateScrollbarGutter()
-    window.addEventListener('resize', handleResize)
 
     // 滾動處理函數
     const handleScroll = () => {
@@ -158,26 +115,15 @@ const vScrollSync: Directive<HTMLDivElement> = {
     stateMap.set(el, {
       headerContainer,
       bodyContainer,
-      updateScrollbarGutter,
-      resizeObserver,
-      handleResize,
       handleScroll,
     })
   },
-  updated(el) {
-    // 觸發更新
-    const state = stateMap.get(el)
-    if (state) {
-      state.updateScrollbarGutter()
-    }
-  },
+
   beforeUnmount(el) {
     // 清理工作
     const state = stateMap.get(el)
     if (state) {
-      state.resizeObserver.disconnect()
       state.bodyContainer?.removeEventListener('scroll', state.handleScroll)
-      window.removeEventListener('resize', state.handleResize)
       stateMap.delete(el)
     }
   },
@@ -310,10 +256,8 @@ export interface ThemeOverrides {
           </TableHeader>
         </table>
       </div>
-      <div
-        :class="cn('relative w-full overflow-auto')"
+      <ScrollArea
         :style="{ ...pick(props.style || {}, ['height', 'min-height', 'max-height']) }"
-        @scroll="(e: Event) => emits('scroll', e)"
       >
         <template v-if="loading">
           <table
@@ -377,11 +321,26 @@ export interface ThemeOverrides {
             </TableBody>
           </table>
         </template>
-      </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   </template>
 </template>
 
 <style scoped>
+[data-orientation="horizontal"] {
+  z-index: 10;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
+}
 
+:deep([data-orientation="vertical"]) {
+  z-index: 10;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
+}
 </style>

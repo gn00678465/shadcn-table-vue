@@ -41,7 +41,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^4.3.0
-        version: 4.3.0(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)
+        version: 4.3.0(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))
       '@faker-js/faker':
         specifier: ^9.5.0
         version: 9.5.0
@@ -65,7 +65,7 @@ importers:
         version: 9.20.1(jiti@2.4.2)
       shadcn-vue:
         specifier: 1.0.0
-        version: 1.0.0(@vitest/ui@3.0.6)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)(vue@3.5.13(typescript@5.7.3))
+        version: 1.0.0(@vitest/ui@3.0.6(vitest@3.0.6))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))(vue@3.5.13(typescript@5.7.3))
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
@@ -3055,7 +3055,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@antfu/eslint-config@4.3.0(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)':
+  '@antfu/eslint-config@4.3.0(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(@vue/compiler-sfc@3.5.13)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))':
     dependencies:
       '@antfu/install-pkg': 1.0.0
       '@clack/prompts': 0.10.0
@@ -3064,7 +3064,7 @@ snapshots:
       '@stylistic/eslint-plugin': 4.0.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       '@typescript-eslint/eslint-plugin': 8.24.1(@typescript-eslint/parser@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       '@typescript-eslint/parser': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
-      '@vitest/eslint-plugin': 1.1.31(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)
+      '@vitest/eslint-plugin': 1.1.31(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))
       ansis: 3.16.0
       cac: 6.7.14
       eslint: 9.20.1(jiti@2.4.2)
@@ -3865,7 +3865,7 @@ snapshots:
       vite: 6.1.1(@types/node@22.13.5)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0)
       vue: 3.5.13(typescript@5.7.3)
 
-  '@vitest/eslint-plugin@1.1.31(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)':
+  '@vitest/eslint-plugin@1.1.31(@typescript-eslint/utils@8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))':
     dependencies:
       '@typescript-eslint/utils': 8.24.1(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.20.1(jiti@2.4.2)
@@ -5830,7 +5830,7 @@ snapshots:
 
   semver@7.7.1: {}
 
-  shadcn-vue@1.0.0(@vitest/ui@3.0.6)(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6)(vue@3.5.13(typescript@5.7.3)):
+  shadcn-vue@1.0.0(@vitest/ui@3.0.6(vitest@3.0.6))(eslint@9.20.1(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.6(@types/debug@4.1.12)(@types/node@22.13.5)(@vitest/ui@3.0.6)(jiti@2.4.2)(stylus@0.57.0)(yaml@2.7.0))(vue@3.5.13(typescript@5.7.3)):
     dependencies:
       '@unovue/detypes': 0.8.4
       '@vitest/ui': 3.0.6(vitest@3.0.6)

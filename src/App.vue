@@ -12,6 +12,7 @@ interface Person {
   email: string
   phone: string
   age: number
+  gender: string
 }
 
 function renderExpanded(row: Row<Person>) {
@@ -81,6 +82,12 @@ const columns: ColumnDef<Person>[] = [
     cell: ({ getValue }) => getValue(),
   },
   {
+    accessorKey: 'gender',
+    header: '性別',
+    cell: ({ getValue }) => getValue(),
+    size: 200,
+  },
+  {
     accessorKey: 'age',
     header: '年齡',
     cell: ({ getValue }) => getValue(),
@@ -102,6 +109,7 @@ function generateFakeData(start: number, length: number): Person[] {
     email: faker.internet.email(),
     phone: faker.phone.number(),
     age: faker.number.int({ min: 18, max: 80 }),
+    gender: faker.person.gender(),
   }))
 }
 
