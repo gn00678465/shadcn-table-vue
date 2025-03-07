@@ -139,7 +139,7 @@ const { table, pagination } = useDataTable<Person>({
     pageSize: 10,
   },
   rowKey: row => `${row.id}`,
-  initialRowSelection: ref(['10']),
+  // initialRowSelection: ref(['10']),
   initialPinning: {
     left: [
       'expander',
@@ -155,9 +155,13 @@ const { table, pagination } = useDataTable<Person>({
   onPageSizeChange: async (pageSize: number): Promise<void> => {
     await fetchData(pagination.value.pageIndex, pageSize)
   },
-  onUpdateCheckedRowKeys(keys) {
+  onUpdateCheckedRowKeys(keys, rows, meta) {
     // eslint-disable-next-line no-console
     console.log('🚀 ~ onUpdateCheckedRowKeys ~ keys:', keys)
+    // eslint-disable-next-line no-console
+    console.log('🚀 ~ onUpdateCheckedRowKeys ~ rows:', rows)
+    // eslint-disable-next-line no-console
+    console.log('🚀 ~ onUpdateCheckedRowKeys ~ meta:', meta)
   },
   onUpdateExpandedKeys(keys) {
     // eslint-disable-next-line no-console

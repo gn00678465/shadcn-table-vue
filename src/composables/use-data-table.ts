@@ -57,6 +57,8 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     initialRowSelection: options.initialRowSelection,
     onUpdateCheckedRowKeys: options.onUpdateCheckedRowKeys,
     enableRowSelection: true,
+    dataRef: options.data,
+    rowKey: options.rowKey,
   })
 
   // 列可見性邏輯
@@ -76,7 +78,7 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
   const { onExpandedChange, expanded, expandedConfig } = useTableExpanding({
     initialExpanded: options.initialExpanded,
     enableExpanding: options.enableExpanding,
-    onUpdateExpandedKeys: options.onUpdateCheckedRowKeys,
+    onUpdateExpandedKeys: options.onUpdateExpandedKeys,
   })
 
   // 創建表格實例
