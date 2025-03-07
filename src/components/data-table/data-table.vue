@@ -261,7 +261,11 @@ export interface ThemeOverrides {
       >
         <template v-if="loading">
           <table
-            :class="cn('w-full caption-bottom text-sm', 'table-fixed')"
+            :class="cn(
+              'w-full caption-bottom text-sm',
+              'table-fixed',
+              [scrollX && 'min-w-[var(--min-width)]'],
+            )"
           >
             <component :is="renderColGroup" />
             <TableBody>
