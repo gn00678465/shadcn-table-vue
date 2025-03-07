@@ -1,0 +1,113 @@
+# .clinerules for shadcn-table-vue
+
+## Project Patterns and Intelligence
+
+### Code Style and Conventions
+1. **Vue SFC Structure**
+   - `.vue` files use `<script setup lang="ts">` for TypeScript support
+   - Generic types use `generic="TData"` syntax with the `setup` attribute
+   - Component props and return types are defined in a separate `<script lang="ts">` block
+   - Style blocks are scoped to the component
+
+2. **Naming Conventions**
+   - Composables are prefixed with `use` (e.g., `useDataTable`)
+   - Component names use PascalCase (e.g., `DataTable`)
+   - File names use kebab-case (e.g., `data-table.vue`)
+   - Internal state variables use camelCase
+
+3. **TypeScript Usage**
+   - Extensive type definitions for all interfaces and functions
+   - Generics used for data typing with `TData` convention
+   - Explicit return types for functions
+   - Type exports for consumer usage
+
+### Implementation Patterns
+
+1. **Composable Design Pattern**
+   - Each feature has its dedicated composable function
+   - Composables return state, handlers, and configuration objects
+   - State is managed with Vue's reactive system (`ref`, `computed`)
+   - Composables accept option objects for configuration
+
+2. **State Management Pattern**
+   - State is initialized from props with fallbacks
+   - Local storage used for persistence when needed
+   - State changes trigger callbacks when provided
+   - Two-way binding achieved through watch and emit
+
+3. **Row Selection Implementation**
+   - Uses a Map-based cache to store selected row data
+   - Selection state is a record of row keys to boolean values
+   - Analyzes update patterns to detect selection intent
+   - Provides metadata about selection actions
+
+4. **Data Flow Pattern**
+   - Props flow down to composables
+   - Composables create and manage state
+   - State feeds into TanStack Table
+   - Events bubble up through callbacks
+   - Component tree passes table instance down
+
+### Critical Implementation Paths
+
+1. **Row Selection Metadata Flow**
+   ```
+   User Selection → analyzeUpdater() → Determine Action Type → Update State → 
+   Update Cache → Generate Metadata → Trigger Callback
+   ```
+
+2. **Selection Change Detection**
+   - Direct object updates: Count keys to determine if bulk action
+   - Function updaters: Simulate execution to predict effect
+   - State comparison: Analyze before/after differences
+
+3. **Row Data Caching**
+   - On selection: Find and cache row data
+   - On pagination: Maintain cache across page changes
+   - On deselection: Remove from cache but preserve others
+   - On data source change: Update cache with new data
+
+### Known Challenges
+
+1. **Selection Intent Detection**
+   - Bulk operations vs. multiple individual selections
+   - Page changes affecting selection behavior
+   - Initial selections vs. runtime selections
+
+2. **Caching Concerns**
+   - Memory usage for large datasets
+   - Cache synchronization with external data changes
+   - Stale data in cache if source changes
+
+3. **Component Integration**
+   - TanStack Table version compatibility
+   - shadcn UI style integration
+   - Performance with many interactive features enabled
+
+### User Preferences
+
+1. **Code Organization**
+   - Preference for smaller, focused files over monolithic ones
+   - Clear separation between logic and presentation
+   - Explicit types over inferred ones
+   - Comprehensive comments for complex logic
+
+2. **Implementation Style**
+   - Favor composition over inheritance
+   - Explicit state management over implicit
+   - Performance considerations for large datasets
+   - Strong typing for component interfaces
+
+### Project Evolution Notes
+
+1. **Row Selection Enhancement**
+   - Initially only provided selected keys
+   - Then added row data alongside keys
+   - Finally added metadata about selection actions
+   - Each iteration improved developer experience
+
+2. **Pagination Integration**
+   - Started as simple page tracking
+   - Evolved to support both client and server pagination
+   - Now includes integration with selection state
+   - Future plans for virtual pagination for large datasets
