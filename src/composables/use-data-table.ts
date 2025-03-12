@@ -14,11 +14,26 @@ import { useTableRowSelection } from './use-table-row-selection'
 
 export { type PaginationInfo }
 
+export interface PersistOptions {
+  /**
+   * 持久化 key
+   */
+  persistKey?: string
+  /**
+   * 是否在 SSR 環境
+   */
+  ssr?: boolean
+  /**
+   * 儲存類型
+   */
+  storageType?: 'local' | 'session' | 'cookie'
+}
+
 export interface DataTableOptions<TData> extends
   TablePaginationOptions,
   TableRowSelectionOptions<TData>,
-  TableColumnVisibilityOptions,
-  Omit<TableColumnPinningOptions, 'persistKey'>,
+  Omit<TableColumnVisibilityOptions, 'persistKey' | 'ssr' | 'storageType'>,
+  Omit<TableColumnPinningOptions, 'persistKey' | 'ssr' | 'storageType'>,
   TableExpandingOptions<TData> {
   /**
    * 表格列定義
@@ -34,6 +49,10 @@ export interface DataTableOptions<TData> extends
    * @type {(originalRow: TData, index: number, parent?: Row<TData> | undefined) => string}
    */
   rowKey?: (originalRow: TData, index: number, parent?: Row<TData> | undefined) => string
+  /**
+   * 持久化設定
+   */
+  persistOptions?: PersistOptions
 }
 
 export interface DataTableReturn<TData> {
@@ -42,6 +61,12 @@ export interface DataTableReturn<TData> {
 }
 
 export function useDataTable<TData>(options: DataTableOptions<TData>): DataTableReturn<TData> {
+  // 提取持久化配置
+  const persistOptions = options.persistOptions || {}
+  const persistKey = persistOptions.persistKey || '' // 向下兼容
+  const ssr = persistOptions.ssr || false
+  const storageType = persistOptions.storageType || 'local'
+
   // 分頁邏輯
   const { pagination, paginationConfig, paginationInfo, onPaginationChange } = useTablePagination<TData>({
     remote: options.remote,
@@ -65,13 +90,17 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
   const { columnVisibility, onColumnVisibilityChange } = useTableColumnVisibility({
     initialVisibility: options.initialVisibility,
     onVisibilityChange: options.onVisibilityChange,
-    persistKey: options.persistKey,
+    persistKey,
+    ssr,
+    storageType,
   })
 
   // column pinning
   const { columnPinning, onColumnPinningChange, columnPinningConfig } = useTableColumnPinning({
     initialPinning: options.initialPinning,
-    persistKey: options.persistKey,
+    persistKey,
+    ssr,
+    storageType,
   })
 
   // expanding

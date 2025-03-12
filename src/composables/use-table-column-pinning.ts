@@ -1,6 +1,7 @@
 import type { ColumnPinningState, OnChangeFn, TableOptions } from '@tanstack/vue-table'
 import type { Ref } from 'vue'
 import { ref } from 'vue'
+import { useStorage } from './use-storage'
 
 export interface TableColumnPinningOptions {
   /**
@@ -11,53 +12,68 @@ export interface TableColumnPinningOptions {
    * 持久化 key
    */
   persistKey?: string
+  /**
+   * 是否在 SSR 環境
+   */
+  ssr?: boolean
+  /**
+   * 儲存類型
+   */
+  storageType?: 'local' | 'session' | 'cookie'
 }
 
-export interface UseTableRowSelectionReturn<TData> {
+export interface UseTableColumnPinningReturn<TData> {
   columnPinning: Ref<ColumnPinningState>
   onColumnPinningChange: OnChangeFn<ColumnPinningState>
   columnPinningConfig: Pick<TableOptions<TData>, 'enableColumnPinning'>
 }
 
-export function useTableColumnPinning<TData>(options: TableColumnPinningOptions = {}): UseTableRowSelectionReturn<TData> {
-  // 從本地存儲加載狀態
-  const loadPersistedState = (): ColumnPinningState => {
-    if (!options.persistKey)
-      return {}
-    try {
-      const stored = localStorage.getItem(`table-pinning-${options.persistKey}`)
-      return stored ? JSON.parse(stored) : {}
-    }
-    catch {
-      return {}
-    }
-  }
+export function useTableColumnPinning<TData>(
+  options: TableColumnPinningOptions = {},
+): UseTableColumnPinningReturn<TData> {
+  const {
+    initialPinning = {},
+    persistKey,
+    ssr = false,
+    storageType = 'local',
+  } = options
 
-  // 保存狀態到本地存儲
-  const persistState = (state: ColumnPinningState): void => {
-    if (!options.persistKey)
-      return
-    try {
-      localStorage.setItem(
-        `table-pinning-${options.persistKey}`,
-        JSON.stringify(state),
-      )
-    }
-    catch {
-      // 忽略存儲錯誤
-    }
-  }
+  let columnPinning: Ref<ColumnPinningState>
+  let savePinning: () => void = () => {}
 
-  const columnPinning = ref<ColumnPinningState>(options.initialPinning ?? loadPersistedState())
+  // 如果提供了持久化 key，使用 useStorage
+  if (persistKey) {
+    const storage = useStorage<ColumnPinningState>(
+      `pinning-${persistKey}`,
+      initialPinning,
+      {
+        type: storageType,
+        ssr,
+        onError: (error) => {
+          console.warn('Failed to persist column pinning:', error)
+        },
+      },
+    )
+
+    columnPinning = storage.data
+    savePinning = storage.save
+  }
+  else {
+    // 沒有持久化，使用普通 ref
+    columnPinning = ref<ColumnPinningState>(initialPinning)
+  }
 
   return {
     columnPinning,
     onColumnPinningChange: (updateOrValue) => {
-      const newState = typeof updateOrValue === 'function' ? updateOrValue(columnPinning.value) : updateOrValue
+      const newState = typeof updateOrValue === 'function'
+        ? updateOrValue(columnPinning.value)
+        : updateOrValue
+
       columnPinning.value = newState
 
-      // 持久化
-      persistState(newState)
+      // 保存到儲存
+      savePinning()
     },
     columnPinningConfig: {
       enableColumnPinning: true,

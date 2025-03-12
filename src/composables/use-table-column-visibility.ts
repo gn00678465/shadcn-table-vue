@@ -1,6 +1,7 @@
 import type { VisibilityState } from '@tanstack/vue-table'
 import type { Ref } from 'vue'
 import { ref } from 'vue'
+import { useStorage } from './use-storage'
 
 export interface TableColumnVisibilityOptions {
   /**
@@ -15,6 +16,14 @@ export interface TableColumnVisibilityOptions {
    * 持久化 key
    */
   persistKey?: string
+  /**
+   * 是否在 SSR 環境
+   */
+  ssr?: boolean
+  /**
+   * 儲存類型
+   */
+  storageType?: 'local' | 'session' | 'cookie'
 }
 
 export interface UseTableColumnVisibilityReturn {
@@ -25,50 +34,56 @@ export interface UseTableColumnVisibilityReturn {
 export function useTableColumnVisibility(
   options: TableColumnVisibilityOptions = {},
 ): UseTableColumnVisibilityReturn {
-  // 從本地存儲加載狀態
-  const loadPersistedState = (): VisibilityState => {
-    if (!options.persistKey)
-      return {}
-    try {
-      const stored = localStorage.getItem(`table-visibility-${options.persistKey}`)
-      return stored ? JSON.parse(stored) : {}
-    }
-    catch {
-      return {}
-    }
+  const {
+    initialVisibility = {},
+    onVisibilityChange,
+    persistKey,
+    ssr = false,
+    storageType = 'local',
+  } = options
+
+  let columnVisibility: Ref<VisibilityState>
+  let saveVisibility: () => void = () => {}
+
+  // 如果提供了持久化 key，使用 useStorage
+  if (persistKey) {
+    const storage = useStorage<VisibilityState>(
+      `visibility-${persistKey}`,
+      initialVisibility,
+      {
+        type: storageType,
+        ssr,
+        onError: (error) => {
+          console.warn('Failed to persist column visibility:', error)
+        },
+      },
+    )
+
+    columnVisibility = storage.data
+    saveVisibility = storage.save
+  }
+  else {
+    // 沒有持久化，使用普通 ref
+    columnVisibility = ref<VisibilityState>(initialVisibility)
   }
 
-  // 保存狀態到本地存儲
-  const persistState = (state: VisibilityState): void => {
-    if (!options.persistKey)
-      return
-    try {
-      localStorage.setItem(
-        `table-visibility-${options.persistKey}`,
-        JSON.stringify(state),
-      )
-    }
-    catch {
-      // 忽略存儲錯誤
-    }
-  }
+  // 列可見性變更處理
+  const onColumnVisibilityChange = (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)): void => {
+    const newState = typeof updater === 'function'
+      ? updater(columnVisibility.value)
+      : updater
 
-  // 列可見性狀態
-  const columnVisibility = ref<VisibilityState>(
-    options.initialVisibility ?? loadPersistedState(),
-  )
+    columnVisibility.value = newState
+
+    // 保存到儲存
+    saveVisibility()
+
+    // 觸發回調
+    onVisibilityChange?.(newState)
+  }
 
   return {
     columnVisibility,
-    onColumnVisibilityChange: (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)) => {
-      const newState = typeof updater === 'function' ? updater(columnVisibility.value) : updater
-      columnVisibility.value = newState
-
-      // 持久化
-      persistState(newState)
-
-      // 觸發回調
-      options.onVisibilityChange?.(newState)
-    },
+    onColumnVisibilityChange,
   }
 }

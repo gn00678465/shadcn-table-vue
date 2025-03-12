@@ -167,6 +167,11 @@ const { table, pagination } = useDataTable<Person>({
     // eslint-disable-next-line no-console
     console.log('🚀 ~ onUpdateExpandedKeys ~ keys:', keys)
   },
+  persistOptions: {
+    persistKey: 'my-table',
+    ssr: false, // 默認值
+    storageType: 'local', // 默認值
+  },
 })
 
 // 初始加載
