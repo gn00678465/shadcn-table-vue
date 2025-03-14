@@ -45,12 +45,23 @@ export function getCommonPinningStyles<TData>({
         : undefined
     : undefined
 
+  // 添加這個函數，用於計算精確的 pixel 值
+  const getPrecisePixelValue = (value: number): string => {
+    // 避免浮點數計算誤差，四捐五入到兩位小數
+    return `${Math.round(value * 100) / 100}px`
+  }
+
   const styles: CSSProperties = {
     // 基本定位和尺寸
-    left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
-    right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
+    left: isPinned === 'left' ? getPrecisePixelValue(column.getStart('left')) : undefined,
+    right: isPinned === 'right' ? getPrecisePixelValue(column.getAfter('right')) : undefined,
     position: isPinned ? 'sticky' : 'relative',
     width: column.getSize(),
+
+    // 添加硬件加速和防抖動屬性
+    transform: isPinned ? 'translateZ(0)' : undefined,
+    willChange: isPinned ? 'transform' : undefined,
+    backfaceVisibility: isPinned ? 'hidden' : undefined,
 
     boxShadow: common.boxShadow ?? defaultBoxShadow,
     opacity: isPinned ? common.opacity : 1,
