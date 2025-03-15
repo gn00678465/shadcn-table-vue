@@ -1,7 +1,13 @@
 # Active Context: shadcn-table-vue
 
 ## Current Development Focus
-We are currently enhancing the row selection functionality in the `useTableRowSelection` composable to provide better metadata about selection actions. The primary goal is to correctly identify different selection actions (individual selection vs. bulk actions) even when paginating through the table.
+We are currently working on two key improvements to the table component:
+
+1. Enhancing the row selection functionality in the `useTableRowSelection` composable to provide better metadata about selection actions. The primary goal is to correctly identify different selection actions (individual selection vs. bulk actions) even when paginating through the table.
+
+2. Fixing UI issues that affect the table experience:
+   - Resolving horizontal scroll jittering for pinned elements
+   - Ensuring proper centering of checkboxes in selection columns
 
 ## Recent Changes
 1. Enhanced the `useTableRowSelection` composable with a metadata system that tracks:
@@ -9,12 +15,24 @@ We are currently enhancing the row selection functionality in the `useTableRowSe
    - The affected row data for individual selections
    - The empty `undefined` row value for bulk actions
 
-2. Implemented a sophisticated behavior detection system:
+2. Fixed horizontal scroll jittering for pinned elements:
+   - Optimized scroll synchronization using `requestAnimationFrame`
+   - Implemented precise pixel value calculations to avoid floating point errors
+   - Added hardware acceleration to pinned elements using CSS transforms
+   - Added stability-enhancing CSS rules to prevent visual jitter
+
+3. Improved checkbox centering in selection columns:
+   - Added comprehensive detection of checkbox elements in table cells
+   - Implemented flexbox-based centering for selection cells
+   - Added explicit props to mark selection columns (isSelectionCell/isSelectionHeader)
+   - Ensured cross-browser compatibility with multiple selector patterns
+
+4. Implemented a sophisticated behavior detection system:
    - Added `analyzeUpdater` function to detect user intent from update patterns
    - Implemented a caching system to maintain selected row data across pagination
    - Added logic to correctly identify bulk actions vs. individual selections
 
-3. Fixed issues with row selection behavior:
+5. Fixed issues with row selection behavior:
    - Corrected action type detection when switching between pages
    - Fixed issues with maintaining selected rows when paginating
    - Ensured row data is correctly included in callbacks

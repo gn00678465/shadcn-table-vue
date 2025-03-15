@@ -2,6 +2,10 @@
 
 ## Completed Features
 
+### UI Improvements
+- ✅ Fixed horizontal scroll jittering for pinned elements
+- ✅ Improved checkbox centering in selection columns
+
 ### Core Table Functionality
 - ✅ Basic table rendering with column definitions
 - ✅ Data-driven row generation

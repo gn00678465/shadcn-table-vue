@@ -48,6 +48,21 @@
    - Events bubble up through callbacks
    - Component tree passes table instance down
 
+### UI Performance Patterns
+
+1. **Pinned Element Stability**
+   - Use `requestAnimationFrame` for scroll synchronization
+   - Precise pixel calculations to avoid floating point errors
+   - Hardware acceleration with `transform: translateZ(0)` for pinned elements
+   - CSS properties to enhance stability: `will-change`, `backface-visibility`
+   - Avoid transitions on scrolling elements
+
+2. **Form Element Positioning**
+   - Checkbox centering uses flexbox in table cells
+   - Multiple selector patterns to detect checkboxes: `[role=checkbox]`, `[type=checkbox]`, `.checkbox`
+   - Explicit props for selection cells: `isSelectionCell` and `isSelectionHeader`
+   - Use `!important` selectively for centering styles to ensure consistency
+
 ### Critical Implementation Paths
 
 1. **Row Selection Metadata Flow**
@@ -79,7 +94,13 @@
    - Cache synchronization with external data changes
    - Stale data in cache if source changes
 
-3. **Component Integration**
+3. **UI Performance Considerations**
+   - Horizontal scrolling stability with pinned elements
+   - Browser-specific rendering differences for sticky positioning
+   - Potential performance impact of hardware acceleration on low-end devices
+   - Checkbox alignment consistency across different table configurations
+
+4. **Component Integration**
    - TanStack Table version compatibility
    - shadcn UI style integration
    - Performance with many interactive features enabled
