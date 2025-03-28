@@ -117,8 +117,11 @@ export interface PaginationInfo {
         <template v-for="(item, index) in items">
           <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
             <Button
-              :class="cn(dataTablePaginationVariants({ size: props.size, disabled: props.disabled }))"
-              :variant="item.value === currentPage ? 'default' : 'outline'"
+              :class="
+                cn(dataTablePaginationVariants({ size: props.size, disabled: props.disabled }),
+                   item.value === currentPage ? 'border-primary text-primary hover:border-primary hover:text-primary hover:bg-transparent' : undefined,
+                )"
+              variant="outline"
               @click="table.setPageIndex(item.value - 1)"
             >
               {{ item.value }}
@@ -150,8 +153,8 @@ export interface PaginationInfo {
           <SelectValue :placeholder="`${props.table.getState().pagination.pageSize} pre page`" />
         </SelectTrigger>
         <SelectContent side="top">
-          <SelectItem v-for="pageSize of pageSizes" :key="pageSize" :value="`${pageSize}`">
-            {{ pageSize }} pre page
+          <SelectItem v-for="_pageSize of pageSizes" :key="_pageSize" :value="`${_pageSize}`">
+            {{ _pageSize }} pre page
           </SelectItem>
         </SelectContent>
       </Select>

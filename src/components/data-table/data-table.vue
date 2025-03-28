@@ -356,24 +356,4 @@ export interface ThemeOverrides {
     cursor: grabbing;
   }
 }
-
-/* 增加防抖動模式樣式 */
-:deep(th[style*="position: sticky"]),
-:deep(td[style*="position: sticky"]) {
-  /* 防止抖動 */
-  transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
-  /* 防止邊界模糊 */
-  image-rendering: crisp-edges;
-  /* 確保流暢滾動 */
-  transition: none;
-}
-
-/* 優化滾動性能 */
-:deep(.relative.w-full.overflow-x-hidden) {
-  transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
-}
 </style>
