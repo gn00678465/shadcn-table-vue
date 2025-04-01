@@ -150,10 +150,10 @@ const { table, pagination } = useDataTable<Person>({
   },
   enableRowSelection: true,
   onPageChange: async (page: number): Promise<void> => {
-    await fetchData(page, pagination.value.pageSize)
+    await fetchData(page, pagination.currentPage)
   },
   onPageSizeChange: async (pageSize: number): Promise<void> => {
-    await fetchData(pagination.value.pageIndex, pageSize)
+    await fetchData(pagination.currentPage, pageSize)
   },
   onUpdateCheckedRowKeys(keys, rows, meta) {
     // eslint-disable-next-line no-console
@@ -208,11 +208,13 @@ onMounted(() => {
       </DataTable>
       <DataTablePagination
         :table="table"
-        :page="pagination.pageIndex"
+        :page="pagination.currentPage"
         :page-count="pagination.pageCount"
-        :page-size="pagination.pageSize"
-        size="sm"
+        :page-size="pagination.currentPageSize"
         :item-count="pagination.itemCount"
+        :is-first-page="pagination.isFirstPage"
+        :is-last-page="pagination.isLastPage"
+        size="sm"
       >
         <template #prefix="props">
           <span>{{ `${props.startIndex}`.padStart(2, '0') }} of {{ `${props.endIndex}`.padStart(2, '0') }}</span>
@@ -247,11 +249,13 @@ onMounted(() => {
       </DataTable>
       <DataTablePagination
         :table="table"
-        :page="pagination.pageIndex"
+        :page="pagination.currentPage"
         :page-count="pagination.pageCount"
-        :page-size="pagination.pageSize"
-        size="sm"
+        :page-size="pagination.currentPageSize"
         :item-count="pagination.itemCount"
+        :is-first-page="pagination.isFirstPage"
+        :is-last-page="pagination.isLastPage"
+        size="sm"
       >
         <template #prefix="props">
           <span>{{ `${props.startIndex}`.padStart(2, '0') }} of {{ `${props.endIndex}`.padStart(2, '0') }}</span>

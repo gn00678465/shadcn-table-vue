@@ -1,5 +1,5 @@
 import type { ColumnDef, Row, Table } from '@tanstack/vue-table'
-import type { ComputedRef, Ref } from 'vue'
+import type { Ref } from 'vue'
 import type { TableColumnPinningOptions } from './use-table-column-pinning'
 import type { TableColumnVisibilityOptions } from './use-table-column-visibility'
 import type { TableExpandingOptions } from './use-table-expanding'
@@ -57,7 +57,7 @@ export interface DataTableOptions<TData> extends
 
 export interface DataTableReturn<TData> {
   table: Table<TData>
-  pagination: ComputedRef<PaginationInfo>
+  pagination: PaginationInfo
 }
 
 export function useDataTable<TData>(options: DataTableOptions<TData>): DataTableReturn<TData> {

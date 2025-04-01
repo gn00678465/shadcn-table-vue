@@ -39,6 +39,8 @@ const props = withDefaults(defineProps<DataTablePaginationProps<TData>>(), {
   size: undefined,
   prefix: undefined,
   suffix: undefined,
+  isFirstPage: false,
+  isLastPage: false,
 })
 
 const slots = defineSlots<{
@@ -52,8 +54,8 @@ const paginationInfo = computed<PaginationInfo>(() => {
     pageSize: props.pageSize,
     itemCount: props.itemCount,
     pageCount: props.pageCount,
-    startIndex: (props.page * props.pageSize) + 1,
-    endIndex: (props.page + 1) * props.pageSize,
+    startIndex: ((props.page - 1) * props.pageSize) + 1,
+    endIndex: props.isLastPage ? props.itemCount : props.page * props.pageSize,
   }
 })
 </script>
@@ -71,6 +73,8 @@ export interface DataTablePaginationProps<TData> {
   size?: DataTablePaginationVariants['size']
   prefix?: (info: PaginationInfo) => VNodeChild
   suffix?: (info: PaginationInfo) => VNodeChild
+  isFirstPage?: boolean
+  isLastPage?: boolean
 }
 
 export interface PaginationInfo {
@@ -93,7 +97,7 @@ export interface PaginationInfo {
     </template>
     <Pagination
       v-slot="{ page: currentPage }"
-      :page="props.page + 1"
+      :page="props.page"
       :items-per-page="table.getState().pagination.pageSize"
       :total="props.itemCount"
       :sibling-count="1"
@@ -104,13 +108,13 @@ export interface PaginationInfo {
       <PaginationList v-slot="{ items }" class="flex items-center gap-1">
         <PaginationFirst
           v-if="!props.showEdges"
-          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: !table.getCanPreviousPage() || props.disabled }))"
-          :disabled="!table.getCanPreviousPage() || props.disabled"
+          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: props.isFirstPage || props.disabled }))"
+          :disabled="props.isFirstPage || props.disabled"
           @click="table.setPageIndex(0)"
         />
         <PaginationPrev
-          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: !table.getCanPreviousPage() || props.disabled }))"
-          :disabled="!table.getCanPreviousPage() || props.disabled"
+          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: props.isFirstPage || props.disabled }))"
+          :disabled="props.isFirstPage || props.disabled"
           @click="table.previousPage()"
         />
 
@@ -131,14 +135,14 @@ export interface PaginationInfo {
         </template>
 
         <PaginationNext
-          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: !table.getCanNextPage() || props.disabled }))"
-          :disabled="!table.getCanNextPage() || props.disabled"
+          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: props.isLastPage || props.disabled }))"
+          :disabled="props.isLastPage || props.disabled"
           @click="table.nextPage()"
         />
         <PaginationLast
           v-if="!props.showEdges"
-          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: !table.getCanNextPage() || props.disabled }))"
-          :disabled="!table.getCanNextPage() || props.disabled"
+          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: props.isLastPage || props.disabled }))"
+          :disabled="props.isLastPage || props.disabled"
           @click="table.setPageIndex(table.getPageCount() - 1)"
         />
       </PaginationList>
@@ -149,12 +153,15 @@ export interface PaginationInfo {
         :disabled="props.disabled"
         @update:model-value="(pageSize) => { table.setPageSize(Number(pageSize)) }"
       >
-        <SelectTrigger :class="cn(dataTablePaginationVariants({ size: props.size }), 'w-[auto]', 'px-2')">
+        <SelectTrigger
+          :class="cn(dataTablePaginationVariants({ size: props.size }),
+                     'w-[auto] px-2', 'focus:ring-0 focus:ring-none focus:ring-offset-0')"
+        >
           <SelectValue :placeholder="`${props.table.getState().pagination.pageSize} pre page`" />
         </SelectTrigger>
         <SelectContent side="top">
           <SelectItem v-for="_pageSize of pageSizes" :key="_pageSize" :value="`${_pageSize}`">
-            {{ _pageSize }} pre page
+            {{ _pageSize }} per page
           </SelectItem>
         </SelectContent>
       </Select>
