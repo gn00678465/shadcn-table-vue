@@ -1,31 +1,36 @@
 import type { Column } from '@tanstack/vue-table'
 import type { CSSProperties } from 'vue'
 
-interface Common {
-  boxShadow?: string
+interface PinningStyleOptions {
   opacity?: number
   zIndex?: number
   additionalStyles?: CSSProperties
 }
 
-export interface PinningStyleOptions extends Common {
-  // 是否顯示邊界陰影
-  withBorder?: boolean
-}
-
 export function getCommonPinningStyles<TData>({
   column,
   options = {},
+  isAtLeftEdge = false,
+  isAtRightEdge = false,
 }: {
   column: Column<TData>
   /**
-   * Show box shadow between pinned and scrollable columns.
-   * @default false
+   * 額外的樣式選項
+   * @default {}
    */
   options?: PinningStyleOptions
+  /**
+   * 是否位於最左側邊緣（滾動條在最左側）
+   * @default true
+   */
+  isAtLeftEdge?: boolean
+  /**
+   * 是否位於最右側邊緣（滾動條在最右側）
+   * @default false
+   */
+  isAtRightEdge?: boolean
 }): CSSProperties {
   const {
-    withBorder = false,
     zIndex = 1,
     ...common
   } = options
@@ -36,14 +41,17 @@ export function getCommonPinningStyles<TData>({
   const isFirstRightPinnedColumn
     = isPinned === 'right' && column.getIsFirstColumn('right')
 
-  // 預設陰影效果
-  const defaultBoxShadow = withBorder
-    ? isLastLeftPinnedColumn
-      ? '-4px 0 4px -4px hsl(var(--border)) inset'
-      : isFirstRightPinnedColumn
-        ? '4px 0 4px -4px hsl(var(--border)) inset'
-        : undefined
-    : undefined
+  // 基於滾動位置的陰影效果
+  let boxShadow: string | undefined
+
+  // 當不在最左邊且有左側固定列時，顯示左側陰影
+  if (isLastLeftPinnedColumn && !isAtLeftEdge) {
+    boxShadow = '-4px 0 4px -4px  rgba(0, 0, 0, .18) inset'
+  }
+  // 當不在最右邊且有右側固定列時，顯示右側陰影
+  else if (isFirstRightPinnedColumn && !isAtRightEdge) {
+    boxShadow = '4px 0 4px -4px  rgba(0, 0, 0, .18) inset'
+  }
 
   const styles: CSSProperties = {
     // 基本定位和尺寸
@@ -52,7 +60,7 @@ export function getCommonPinningStyles<TData>({
     position: isPinned ? 'sticky' : 'relative',
     width: column.getSize(),
 
-    boxShadow: common.boxShadow ?? defaultBoxShadow,
+    boxShadow,
     opacity: isPinned ? common.opacity : 1,
     zIndex: isPinned ? zIndex : 0,
   }

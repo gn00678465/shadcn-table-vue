@@ -1,5 +1,4 @@
-<script setup lang="ts" generic="TData">
-import type { PinningStyleOptions } from '@/utils/data-table'
+<script lang="ts">
 import type { Row, Table as TanstackTable } from '@tanstack/vue-table'
 import type { CSSProperties, Directive, HTMLAttributes, VNodeChild } from 'vue'
 import type { DataTableVariants } from '.'
@@ -7,13 +6,43 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import { FlexRender } from '@tanstack/vue-table'
-import { computed, h, toRefs } from 'vue'
+import { computed, h, ref, toRefs } from 'vue'
 import { dataTableVariants } from '.'
 import { getCommonPinningStyles } from '../../utils/data-table'
 import { toCssVarName } from '../../utils/themes'
 import { omit, pick } from '../../utils/utils'
 import { LoadingRow } from './loading-row'
 
+export interface DataTableProps<TData> {
+  /**
+   * The table instance returned from useDataTable hook with pagination, sorting, filtering, etc.
+   * @type TanstackTable<TData>
+   */
+  table: TanstackTable<TData>
+  class?: HTMLAttributes['class']
+  style?: CSSProperties
+  /** */
+  renderExpanded?: (row: Row<TData>, rowIndex: number) => VNodeChild
+  flexHeight?: boolean
+  size?: DataTableVariants['size']
+  scrollX?: number
+  rowClassName?: string | ((row: Row<TData>, rowIndex: number) => string)
+  rowProps?: (row: Row<TData>, rowIndex: number) => HTMLAttributes
+  //
+  themeOverrides?: ThemeOverrides
+  //
+  loading?: boolean
+}
+
+export interface ThemeOverrides {
+  tdColor?: string
+  tdColorHover?: string
+  thColor?: string
+  thColorHover?: string
+}
+</script>
+
+<script setup lang="ts" generic="TData">
 defineOptions({
   name: 'DataTable',
   inheritAttrs: false,
@@ -26,7 +55,6 @@ const props = withDefaults(defineProps<DataTableProps<TData>>(), {
   scrollX: undefined,
   rowClassName: undefined,
   rowProps: undefined,
-  pinningOptions: undefined,
   themeOverrides: () => ({
     thColor: 'rgba(250, 250, 252, 1)',
     thColorHover: 'rgba(243, 243, 247, 1)',
@@ -40,7 +68,10 @@ defineSlots<{
   empty: () => any
 }>()
 
-const { renderExpanded, flexHeight, scrollX, rowClassName, rowProps, pinningOptions, themeOverrides, loading } = toRefs(props)
+const { renderExpanded, flexHeight, scrollX, rowClassName, rowProps, themeOverrides, loading } = toRefs(props)
+
+const isAtLeftEdge = ref(true)
+const isAtRightEdge = ref(false)
 
 const isStickyLayout = computed(() => flexHeight.value)
 const isEmpty = computed(() => !props.table.getCoreRowModel().rows?.length)
@@ -87,11 +118,9 @@ const stateMap = new WeakMap<HTMLElement, ScrollSyncState>()
 
 const vScrollSync: Directive<HTMLDivElement> = {
   mounted(el, binding) {
-    // 設置選擇器，默認選擇第一個和第二個直接子元素
     const headerSelector = ':scope > div:first-child'
     const bodySelector = ':scope > div:last-child > div:first-child'
 
-    // 獲取容器元素
     const headerContainer = el.querySelector(headerSelector) as HTMLElement
     const bodyContainer = el.querySelector(bodySelector) as HTMLElement
 
@@ -100,20 +129,21 @@ const vScrollSync: Directive<HTMLDivElement> = {
       return
     }
 
-    // 滾動處理函數
     const handleScroll = () => {
       if (headerContainer && bodyContainer) {
-        // 使用 requestAnimationFrame 確保在最佳渲染時機更新
         requestAnimationFrame(() => {
           headerContainer.scrollLeft = bodyContainer.scrollLeft
+
+          const { scrollLeft, scrollWidth, clientWidth } = bodyContainer
+          isAtLeftEdge.value = scrollLeft <= 0
+          isAtRightEdge.value = Math.ceil(scrollLeft + clientWidth) >= scrollWidth
         })
       }
     }
 
-    // 添加滾動事件監聽
     bodyContainer.addEventListener('scroll', handleScroll)
+    handleScroll()
 
-    // 存儲狀態到 WeakMap
     stateMap.set(el, {
       headerContainer,
       bodyContainer,
@@ -122,45 +152,12 @@ const vScrollSync: Directive<HTMLDivElement> = {
   },
 
   beforeUnmount(el) {
-    // 清理工作
     const state = stateMap.get(el)
     if (state) {
       state.bodyContainer?.removeEventListener('scroll', state.handleScroll)
       stateMap.delete(el)
     }
   },
-}
-</script>
-
-<script lang="ts">
-export interface DataTableProps<TData> {
-  /**
-   * The table instance returned from useDataTable hook with pagination, sorting, filtering, etc.
-   * @type TanstackTable<TData>
-   */
-  table: TanstackTable<TData>
-  class?: HTMLAttributes['class']
-  style?: CSSProperties
-  /** */
-  renderExpanded?: (row: Row<TData>, rowIndex: number) => VNodeChild
-  flexHeight?: boolean
-  size?: DataTableVariants['size']
-  scrollX?: number
-  rowClassName?: string | ((row: Row<TData>, rowIndex: number) => string)
-  rowProps?: (row: Row<TData>, rowIndex: number) => HTMLAttributes
-  // pinning 樣式配置
-  pinningOptions?: PinningStyleOptions
-  //
-  themeOverrides?: ThemeOverrides
-  //
-  loading?: boolean
-}
-
-export interface ThemeOverrides {
-  tdColor?: string
-  tdColorHover?: string
-  thColor?: string
-  thColorHover?: string
 }
 </script>
 
@@ -178,7 +175,11 @@ export interface ThemeOverrides {
               v-for="header of headerGroup.headers"
               :key="header.id"
               :col-span="header.colSpan"
-              :style="getCommonPinningStyles({ column: header.column, options: pinningOptions })"
+              :style="getCommonPinningStyles({
+                column: header.column,
+                isAtLeftEdge,
+                isAtRightEdge,
+              })"
             >
               <FlexRender
                 v-if="!header.isPlaceholder"
@@ -202,7 +203,8 @@ export interface ThemeOverrides {
                   :style="{
                     ...getCommonPinningStyles({
                       column: cell.column,
-                      options: pinningOptions,
+                      isAtLeftEdge,
+                      isAtRightEdge,
                     }),
                   }"
                 >
@@ -246,7 +248,11 @@ export interface ThemeOverrides {
                 :key="header.id"
                 :colspan="header.colSpan"
                 :class="cn(dataTableVariants({ size: props.size }), 'bg-[var(--th-color)]')"
-                :style="getCommonPinningStyles({ column: header.column, options: pinningOptions })"
+                :style="getCommonPinningStyles({
+                  column: header.column,
+                  isAtLeftEdge,
+                  isAtRightEdge,
+                })"
               >
                 <FlexRender
                   v-if="!header.isPlaceholder"
@@ -277,7 +283,6 @@ export interface ThemeOverrides {
                 class="hover:bg-transparent"
                 :columns="props.table.getAllLeafColumns()"
                 :size="props.size"
-                :pinning-options="pinningOptions"
               />
             </TableBody>
           </table>
@@ -316,7 +321,11 @@ export interface ThemeOverrides {
                       :key="cell.id"
                       v-bind="(cell.column.columnDef.meta?.cellProps?.(row, idx) ?? {})"
                       :class="cn(dataTableVariants({ size: props.size }), 'bg-[var(--td-color)]', 'group-hover:bg-[--td-color-hover]')"
-                      :style="getCommonPinningStyles({ column: cell.column, options: pinningOptions })"
+                      :style="getCommonPinningStyles({
+                        column: cell.column,
+                        isAtLeftEdge,
+                        isAtRightEdge,
+                      })"
                     >
                       <FlexRender
                         :render="cell.column.columnDef.cell"
