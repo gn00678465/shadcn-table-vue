@@ -87,8 +87,9 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
   })
 
   // 列可見性邏輯
-  const { columnVisibility, onColumnVisibilityChange } = useTableColumnVisibility({
+  const { columnVisibility, initialColumnVisibility, onColumnVisibilityChange } = useTableColumnVisibility({
     initialVisibility: options.initialVisibility,
+    initialHiddenColumns: options.initialHiddenColumns,
     onVisibilityChange: options.onVisibilityChange,
     persistKey,
     ssr,
@@ -116,6 +117,9 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
       return options.data.value
     },
     getRowId: options.rowKey,
+    initialState: {
+      columnVisibility: initialColumnVisibility,
+    },
     // state
     state: {
       get pagination() {

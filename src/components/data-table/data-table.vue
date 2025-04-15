@@ -32,6 +32,7 @@ export interface DataTableProps<TData> {
   themeOverrides?: ThemeOverrides
   //
   loading?: boolean
+  loadingRowEstimateSize?: (index: number) => number
 }
 
 export interface ThemeOverrides {
@@ -282,7 +283,7 @@ const vScrollSync: Directive<HTMLDivElement> = {
                 :key="i"
                 class="hover:bg-transparent"
                 :columns="props.table.getAllLeafColumns()"
-                :size="props.size"
+                :estimate-size="!props.loadingRowEstimateSize ? undefined : (() => props.loadingRowEstimateSize!(i))"
               />
             </TableBody>
           </table>

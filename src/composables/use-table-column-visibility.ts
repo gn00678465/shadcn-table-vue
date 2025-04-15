@@ -24,10 +24,15 @@ export interface TableColumnVisibilityOptions {
    * 儲存類型
    */
   storageType?: 'local' | 'session' | 'cookie'
+  /**
+   * 預設隱藏的欄位 ID 清單
+   */
+  initialHiddenColumns?: string[]
 }
 
 export interface UseTableColumnVisibilityReturn {
   columnVisibility: Ref<VisibilityState>
+  initialColumnVisibility: VisibilityState
   onColumnVisibilityChange: (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)) => void
 }
 
@@ -36,11 +41,24 @@ export function useTableColumnVisibility(
 ): UseTableColumnVisibilityReturn {
   const {
     initialVisibility = {},
+    initialHiddenColumns = [],
     onVisibilityChange,
     persistKey,
     ssr = false,
     storageType = 'local',
   } = options
+
+  // 根據 initialHiddenColumns 生成預設隱藏狀態
+  const initialHiddenState: VisibilityState = {}
+  initialHiddenColumns.forEach((columnId) => {
+    initialHiddenState[columnId] = false
+  })
+
+  // 合併預設隱藏狀態和使用者提供的初始狀態
+  const mergedInitialVisibility: VisibilityState = {
+    ...initialHiddenState,
+    ...initialVisibility,
+  }
 
   let columnVisibility: Ref<VisibilityState>
   let saveVisibility: () => void = () => {}
@@ -48,23 +66,26 @@ export function useTableColumnVisibility(
   // 如果提供了持久化 key，使用 useStorage
   if (persistKey) {
     const storage = useStorage<VisibilityState>(
-      `visibility-${persistKey}`,
-      initialVisibility,
+      persistKey,
+      mergedInitialVisibility,
       {
         type: storageType,
         ssr,
+        prefix: 'table-',
+        suffix: '-visibility',
         onError: (error) => {
           console.warn('Failed to persist column visibility:', error)
         },
+        useDebounce: true,
+        debounceDelay: 500,
       },
     )
-
     columnVisibility = storage.data
-    saveVisibility = storage.save
+    saveVisibility = storage.debouncedSave
   }
   else {
     // 沒有持久化，使用普通 ref
-    columnVisibility = ref<VisibilityState>(initialVisibility)
+    columnVisibility = ref<VisibilityState>(mergedInitialVisibility)
   }
 
   // 列可見性變更處理
@@ -84,6 +105,7 @@ export function useTableColumnVisibility(
 
   return {
     columnVisibility,
+    initialColumnVisibility: mergedInitialVisibility,
     onColumnVisibilityChange,
   }
 }

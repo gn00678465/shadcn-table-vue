@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 import { onMounted, ref } from 'vue'
 
 export type StorageType = 'local' | 'session' | 'cookie'
@@ -11,9 +12,14 @@ export interface StorageOptions {
   type?: StorageType
   /**
    * 儲存前綴
-   * @default 'shadcn-table-'
+   * @default ''
    */
   prefix?: string
+  /**
+   * 儲存後綴
+   * @default ''
+   */
+  suffix?: string
   /**
    * 是否在 SSR 環境
    * @default false
@@ -23,6 +29,16 @@ export interface StorageOptions {
    * 錯誤處理
    */
   onError?: (error: Error) => void
+  /**
+   * 防抖延遲時間 (毫秒)
+   * @default 500
+   */
+  debounceDelay?: number
+  /**
+   * 是否使用防抖處理
+   * @default true
+   */
+  useDebounce?: boolean
 }
 
 type GetStorageReturn = Storage | {
@@ -35,8 +51,10 @@ export interface UseStorageReturn<T> {
   data: Ref<T>
   isHydrated: Ref<boolean>
   save: () => void
+  debouncedSave: () => void
   clear: () => void
   update: (newValue: T) => void
+  updateImmediate: (newValue: T) => void
 }
 
 /**
@@ -50,11 +68,14 @@ export function useStorage<T>(
   const {
     type = 'local',
     prefix = '',
+    suffix = '',
     ssr = false,
     onError = console.error,
+    debounceDelay = 500,
+    useDebounce = true,
   } = options
 
-  const fullKey = `${prefix}${key}`
+  const fullKey = `${prefix}${key}${suffix}`
   const data = ref(initialValue) as Ref<T>
   const isClient = typeof window !== 'undefined'
   const isHydrated = ref(false)
@@ -158,13 +179,22 @@ export function useStorage<T>(
     })
   }
 
+  // 建立防抖動版本的儲存函式
+  const debouncedSave = useDebounceFn(saveData, debounceDelay)
+
   return {
     data,
     isHydrated,
     save: saveData,
+    debouncedSave,
     clear: clearData,
-    // 用於直接設置數據並保存
+    // 更新資料時根據設定使用適當的儲存方法
     update: (newValue: T) => {
+      data.value = newValue
+      useDebounce ? debouncedSave() : saveData()
+    },
+    // 提供即時更新方法，不使用防抖動
+    updateImmediate: (newValue: T) => {
       data.value = newValue
       saveData()
     },

@@ -44,19 +44,23 @@ export function useTableColumnPinning<TData>(
   // 如果提供了持久化 key，使用 useStorage
   if (persistKey) {
     const storage = useStorage<ColumnPinningState>(
-      `pinning-${persistKey}`,
+      persistKey,
       initialPinning,
       {
         type: storageType,
         ssr,
+        prefix: 'table-',
+        suffix: '-pinning',
         onError: (error) => {
           console.warn('Failed to persist column pinning:', error)
         },
+        useDebounce: true,
+        debounceDelay: 500,
       },
     )
 
     columnPinning = storage.data
-    savePinning = storage.save
+    savePinning = storage.debouncedSave
   }
   else {
     // 沒有持久化，使用普通 ref
