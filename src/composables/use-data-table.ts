@@ -82,8 +82,6 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     initialRowSelection: options.initialRowSelection,
     onUpdateCheckedRowKeys: options.onUpdateCheckedRowKeys,
     enableRowSelection: true,
-    dataRef: options.data,
-    rowKey: options.rowKey,
   })
 
   // 列可見性邏輯

@@ -62,23 +62,25 @@ function onReset() {
   <Popover modal>
     <PopoverTrigger as-child>
       <Button
+        v-if="!slots.trigger"
         ref="triggerRef"
         aria-label="Toggle columns"
         variant="outline"
         role="combobox"
         size="sm"
         class="hidden gap-2 focus:outline-none focus:ring-1 focus:ring-ring focus-visible:ring-0 lg:inline-flex"
-        v-bind="props.triggerProps"
       >
-        <template v-if="!slots.trigger">
-          <Settings2 class="size-4" />
-          View
-          <ChevronsUpDown class="ml-auto size-4 shrink-0 opacity-50" />
-        </template>
-        <template v-else>
-          <component :is="slots.trigger" />
-        </template>
+        <Settings2 class="size-4" />
+        View
+        <ChevronsUpDown class="ml-auto size-4 shrink-0 opacity-50" />
       </Button>
+      <slot
+        v-else
+        ref="triggerRef"
+        name="trigger"
+        role="combobox"
+        aria-label="Toggle columns"
+      />
     </PopoverTrigger>
     <PopoverContent
       align="end"
