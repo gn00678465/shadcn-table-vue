@@ -237,7 +237,13 @@ const vScrollSync: Directive<HTMLDivElement> = {
       }"
     >
       <div class="relative w-full overflow-x-hidden bg-[var(--th-color)]">
-        <table :class="cn('w-full caption-bottom text-sm table-fixed', [scrollX && 'min-w-[var(--min-width)]'])">
+        <table
+          :class="cn(
+            'w-full caption-bottom text-sm',
+            'table-fixed',
+            'border-spacing-0 border-separate',
+            [scrollX && 'min-w-[var(--min-width)]'])"
+        >
           <component :is="renderColGroup" />
           <TableHeader
             v-for="headerGroup of table.getHeaderGroups()"
@@ -248,7 +254,9 @@ const vScrollSync: Directive<HTMLDivElement> = {
                 v-for="header of headerGroup.headers"
                 :key="header.id"
                 :colspan="header.colSpan"
-                :class="cn(dataTableVariants({ size: props.size }), 'bg-[var(--th-color)]')"
+                :class="cn(
+                  dataTableVariants({ size: props.size }),
+                  'bg-[var(--th-color)] border-b')"
                 :style="getCommonPinningStyles({
                   column: header.column,
                   isAtLeftEdge,
@@ -305,6 +313,7 @@ const vScrollSync: Directive<HTMLDivElement> = {
             :class="cn(
               'w-full caption-bottom text-sm',
               'table-fixed',
+              'border-spacing-0 border-separate',
               [scrollX && 'min-w-[var(--min-width)]'],
             )"
           >
@@ -314,14 +323,18 @@ const vScrollSync: Directive<HTMLDivElement> = {
                 <template v-for="(row, idx) of table.getRowModel().rows" :key="row.id">
                   <TableRow
                     v-bind="rowAttrs(row, idx)"
+                    :class="cn('group', 'data-[state=selected]:bg-transparent border-b-0')"
                     :data-state="row.getIsSelected() && 'selected'"
-                    :class="cn('group', 'data-[state=selected]:bg-transparent')"
+                    :data-last-row="idx === table.getRowModel().rows.length - 1 ? 'true' : 'false'"
                   >
                     <TableCell
                       v-for="cell of row.getVisibleCells()"
                       :key="cell.id"
                       v-bind="(cell.column.columnDef.meta?.cellProps?.(row, idx) ?? {})"
-                      :class="cn(dataTableVariants({ size: props.size }), 'bg-[var(--td-color)]', 'group-hover:bg-[--td-color-hover]')"
+                      :class="cn(dataTableVariants({ size: props.size }),
+                                 'group-data-[last-row=false]:border-b',
+                                 'bg-[var(--td-color)]', 'group-hover:bg-[--td-color-hover]',
+                      )"
                       :style="getCommonPinningStyles({
                         column: cell.column,
                         isAtLeftEdge,
