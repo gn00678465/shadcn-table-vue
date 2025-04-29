@@ -1,7 +1,7 @@
-<script setup lang="ts" generic="TData">
+<script lang="ts">
 import type { Table } from '@tanstack/vue-table'
+import type { VariantProps } from 'class-variance-authority'
 import type { VNodeChild } from 'vue'
-import type { DataTablePaginationVariants } from './index'
 import { Button } from '@/components/ui/button'
 import {
   Pagination,
@@ -21,9 +21,56 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
+import { cva } from 'class-variance-authority'
 import { computed } from 'vue'
-import { dataTablePaginationVariants } from './index'
 
+export const dataTablePaginationVariants = cva('p-0', {
+  variants: {
+    size: {
+      lg: 'h-10 w-10',
+      default: 'h-8 w-8',
+      sm: 'h-7 w-7 text-sm',
+    },
+    disabled: {
+      true: 'disabled:cursor-not-allowed',
+      false: '',
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+    disabled: false,
+  },
+})
+
+export type DataTablePaginationVariants = VariantProps<typeof dataTablePaginationVariants>
+
+export interface DataTablePaginationProps<TData> {
+  table: Table<TData>
+  page?: number
+  pageSize?: number
+  pageSizes?: number[]
+  pageCount?: number
+  itemCount?: number
+  showEdges?: boolean
+  disabled?: boolean
+  size?: DataTablePaginationVariants['size']
+  prefix?: (info: PaginationInfo) => VNodeChild
+  suffix?: (info: PaginationInfo) => VNodeChild
+  isFirstPage?: boolean
+  isLastPage?: boolean
+}
+
+export interface PaginationInfo {
+  startIndex: number
+  endIndex: number
+  page: number
+  pageSize: number
+  pageCount: number
+  itemCount: number | undefined
+}
+</script>
+
+<script setup lang="ts" generic="TData">
 defineOptions({
   name: 'DataTablePagination',
 })
@@ -58,33 +105,6 @@ const paginationInfo = computed<PaginationInfo>(() => {
     endIndex: props.isLastPage ? props.itemCount : props.page * props.pageSize,
   }
 })
-</script>
-
-<script lang="ts">
-export interface DataTablePaginationProps<TData> {
-  table: Table<TData>
-  page?: number
-  pageSize?: number
-  pageSizes?: number[]
-  pageCount?: number
-  itemCount?: number
-  showEdges?: boolean
-  disabled?: boolean
-  size?: DataTablePaginationVariants['size']
-  prefix?: (info: PaginationInfo) => VNodeChild
-  suffix?: (info: PaginationInfo) => VNodeChild
-  isFirstPage?: boolean
-  isLastPage?: boolean
-}
-
-export interface PaginationInfo {
-  startIndex: number
-  endIndex: number
-  page: number
-  pageSize: number
-  pageCount: number
-  itemCount: number | undefined
-}
 </script>
 
 <template>

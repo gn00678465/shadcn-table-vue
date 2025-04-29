@@ -1,17 +1,30 @@
 <script lang="ts">
 import type { Row, Table as TanstackTable } from '@tanstack/vue-table'
+import type { VariantProps } from 'class-variance-authority'
 import type { CSSProperties, Directive, HTMLAttributes, VNodeChild } from 'vue'
-import type { DataTableVariants } from '.'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import { FlexRender } from '@tanstack/vue-table'
+import { cva } from 'class-variance-authority'
 import { computed, h, ref, toRefs } from 'vue'
-import { dataTableVariants } from '.'
-import { getCommonPinningStyles } from '../../utils/data-table'
-import { toCssVarName } from '../../utils/themes'
-import { omit, pick } from '../../utils/utils'
-import { LoadingRow } from './loading-row'
+import { getCommonPinningStyles } from '../../../utils/data-table'
+import { toCssVarName } from '../../../utils/themes'
+import { omit, pick } from '../../../utils/utils'
+import LoadingRow from '../loading-row/index.vue'
+
+export const dataTableVariants = cva('', {
+  variants: {
+    size: {
+      default: ['p-4'],
+      sm: ['px-4', 'py-3'],
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+  },
+})
+export type DataTableVariants = VariantProps<typeof dataTableVariants>
 
 export interface DataTableProps<TData> {
   /**

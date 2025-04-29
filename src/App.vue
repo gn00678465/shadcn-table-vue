@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { ColumnDef, Row } from '@tanstack/vue-table'
-import { DataTable, DataTablePagination, DataTableViewOptions } from '@/components/data-table'
+import DataTablePagination from '@/components/data-table/data-table-pagination/index.vue'
+import DataTableViewOptions from '@/components/data-table/data-table-view-options/index.vue'
+import DataTable from '@/components/data-table/data-table/index.vue'
 import { useDataTable } from '@/composables/use-data-table'
 import { faker } from '@faker-js/faker/locale/zh_TW'
 import { h, onMounted, ref } from 'vue'
@@ -155,13 +157,9 @@ const { table, pagination } = useDataTable<Person>({
   onPageSizeChange: async (pageSize: number): Promise<void> => {
     await fetchData(pagination.currentPage, pageSize)
   },
-  onUpdateCheckedRowKeys(keys, rows, meta) {
+  onUpdateCheckedRowKeys(keys) {
     // eslint-disable-next-line no-console
     console.log('🚀 ~ onUpdateCheckedRowKeys ~ keys:', keys)
-    // eslint-disable-next-line no-console
-    console.log('🚀 ~ onUpdateCheckedRowKeys ~ rows:', rows)
-    // eslint-disable-next-line no-console
-    console.log('🚀 ~ onUpdateCheckedRowKeys ~ meta:', meta)
   },
   onUpdateExpandedKeys(keys) {
     // eslint-disable-next-line no-console
