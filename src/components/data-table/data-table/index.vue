@@ -63,17 +63,17 @@ defineOptions({
 })
 
 const props = withDefaults(defineProps<DataTableProps<TData>>(), {
-  class: '',
+  class: undefined,
   flexHeight: false,
   size: 'default',
   scrollX: undefined,
   rowClassName: undefined,
   rowProps: undefined,
   themeOverrides: () => ({
-    thColor: 'rgba(250, 250, 252, 1)',
-    thColorHover: 'rgba(243, 243, 247, 1)',
-    tdColor: '#fff',
-    tdColorHover: 'rgba(247, 247, 250, 1)',
+    thColor: 'hsl(var(--data-table-header, 0 0% 98%))',
+    thColorHover: 'hsl(var(--data-table-header-hover, 0 0% 96.1%))',
+    tdColor: 'hsl(var(--data-table-cell, 0 0% 100%))',
+    tdColorHover: 'hsl(var(--data-table-cell-hover, 0 0% 97.5%))',
   }),
   loading: false,
 })
@@ -177,7 +177,14 @@ const vScrollSync: Directive<HTMLDivElement> = {
 
 <template>
   <template v-if="!isStickyLayout">
-    <div class="overflow-hidden rounded-md border">
+    <div
+      :class="cn('overflow-hidden rounded-md border', props.class)"
+      :style="{
+        '--min-width': scrollX && `${scrollX}px`,
+        ...props.style,
+        ...tableStyles,
+      }"
+    >
       <Table>
         <component :is="renderColGroup" />
         <TableHeader
@@ -188,7 +195,10 @@ const vScrollSync: Directive<HTMLDivElement> = {
             <TableHead
               v-for="header of headerGroup.headers"
               :key="header.id"
-              :col-span="header.colSpan"
+              :colspan="header.colSpan"
+              :class="cn(
+                dataTableVariants({ size: props.size }),
+                'bg-[var(--th-color)]')"
               :style="getCommonPinningStyles({
                 column: header.column,
                 isAtLeftEdge,
@@ -214,13 +224,15 @@ const vScrollSync: Directive<HTMLDivElement> = {
                 <TableCell
                   v-for="cell of row.getVisibleCells()"
                   :key="cell.id"
-                  :style="{
-                    ...getCommonPinningStyles({
-                      column: cell.column,
-                      isAtLeftEdge,
-                      isAtRightEdge,
-                    }),
-                  }"
+                  :class="cn(dataTableVariants({ size: props.size }),
+                             'group-data-[last-row=false]:border-b',
+                             'bg-[var(--td-color)]', 'group-hover:bg-[--td-color-hover]',
+                  )"
+                  :style="getCommonPinningStyles({
+                    column: cell.column,
+                    isAtLeftEdge,
+                    isAtRightEdge,
+                  })"
                 >
                   <FlexRender
                     :render="cell.column.columnDef.cell"
@@ -235,6 +247,20 @@ const vScrollSync: Directive<HTMLDivElement> = {
               </TableRow>
             </template>
           </template>
+          <template v-else>
+            <TableCell :colspan="table.getVisibleLeafColumns().length">
+              <div class="py-4">
+                <slot name="empty">
+                  <div class="flex flex-col items-center justify-center text-center">
+                    <svg class="h-28 w-28 text-muted-foreground/30" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 4v6.025V10v10zv5zm0 18q-.825 0-1.412-.587T3 20V4q0-.825.588-1.412T5 2h7.175q.4 0 .763.15t.637.425l4.85 4.85q.275.275.425.638t.15.762v.7q0 .425-.288.7T18 10.5t-.712-.288T17 9.5V9h-4q-.425 0-.712-.288T12 8V4H5v16h5.5q.425 0 .713.288T11.5 21t-.288.713T10.5 22zm11.5-3q1.05 0 1.775-.725T19 16.5t-.725-1.775T16.5 14t-1.775.725T14 16.5t.725 1.775T16.5 19m5.8 3.3q-.275.275-.7.275t-.7-.275l-2-2q-.525.35-1.137.525T16.5 21q-1.875 0-3.187-1.312T12 16.5t1.313-3.187T16.5 12t3.188 1.313T21 16.5q0 .65-.175 1.263T20.3 18.9l2 2q.275.275.275.7t-.275.7" /></svg>
+                    <p class="text-xl font-medium text-muted-foreground/30 mt-4">
+                      No Data Found
+                    </p>
+                  </div>
+                </slot>
+              </div>
+            </TableCell>
+          </template>
         </TableBody>
       </Table>
     </div>
@@ -242,7 +268,7 @@ const vScrollSync: Directive<HTMLDivElement> = {
   <template v-else>
     <div
       v-scroll-sync
-      class="overflow-hidden rounded-md border"
+      :class="cn('overflow-hidden rounded-md border', props.class)"
       :style="{
         '--min-width': scrollX && `${scrollX}px`,
         ...omit(props.style || {}, ['height', 'min-height', 'max-height']),
@@ -302,6 +328,7 @@ const vScrollSync: Directive<HTMLDivElement> = {
               <LoadingRow
                 v-for="(_, i) of Array.from({ length: 10 })"
                 :key="i"
+                :index="i"
                 class="hover:bg-transparent"
                 :columns="props.table.getAllLeafColumns()"
                 :estimate-size="!props.loadingRowEstimateSize ? undefined : (() => props.loadingRowEstimateSize!(i))"
