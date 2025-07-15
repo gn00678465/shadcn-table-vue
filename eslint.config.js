@@ -1,8 +1,3 @@
-import antfu from '@antfu/eslint-config'
+import withNuxt from './.playground/.nuxt/eslint.config.mjs'
 
-export default antfu({
-  typescript: true,
-  stylistic: true,
-  vue: true,
-  type: 'lib',
-})
+export default withNuxt()

@@ -1,5 +1,73 @@
-# Vue 3 + TypeScript + Vite
+# Nuxt Layer Starter
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Create Nuxt extendable layer with this GitHub template.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Setup
+
+Make sure to install the dependencies:
+
+```bash
+pnpm install
+```
+
+## Working on your layer
+
+Your layer is at the root of this repository, it is exactly like a regular Nuxt project, except you can publish it on NPM.
+
+The `.playground` directory should help you on trying your layer during development.
+
+Running `pnpm dev` will prepare and boot `.playground` directory, which imports your layer itself.
+
+## Distributing your layer
+
+Your Nuxt layer is shaped exactly the same as any other Nuxt project, except you can publish it on NPM.
+
+To do so, you only have to check if `files` in `package.json` are valid, then run:
+
+```bash
+npm publish --access public
+```
+
+Once done, your users will only have to run:
+
+```bash
+npm install --save your-layer
+```
+
+Then add the dependency to their `extends` in `nuxt.config`:
+
+```ts
+defineNuxtConfig({
+  extends: 'your-layer'
+})
+```
+
+## Development Server
+
+Start the development server on http://localhost:3000
+
+```bash
+pnpm dev
+```
+
+## Production
+
+Build the application for production:
+
+```bash
+pnpm build
+```
+
+Or statically generate it with:
+
+```bash
+pnpm generate
+```
+
+Locally preview production build:
+
+```bash
+pnpm preview
+```
+
+Checkout the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
