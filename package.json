@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "latest",
+    "@nuxtjs/i18n": "10.0.6",
     "eslint": "^9.34.0",
     "nuxt": "^3.19.0",
     "shadcn-nuxt": "2.2.0",
