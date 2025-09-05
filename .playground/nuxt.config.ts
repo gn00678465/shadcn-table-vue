@@ -11,7 +11,11 @@ export default defineNuxtConfig({
   eslint: {
     config: {
       // Use the generated ESLint config for lint root project as well
-      rootDir: fileURLToPath(new URL('..', import.meta.url))
+      rootDir: fileURLToPath(new URL('..', import.meta.url)),
+       stylistic: {
+        indent: 2,
+        semi: true,
+      }
     }
   },
   css: [join(currentDir, './assets/css/tailwind.css')],
@@ -26,5 +30,5 @@ export default defineNuxtConfig({
   shadcn: {
     prefix: '',
     componentDir: './components/ui'
-  }
+  },
 })

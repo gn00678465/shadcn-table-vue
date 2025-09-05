@@ -17,8 +17,5 @@ dist
 # Local History
 .history
 
-# VSCode
-.vscode/
-
 # JetBrains/WebStorm
 .idea/
