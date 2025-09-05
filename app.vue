@@ -1,3 +1,8 @@
+<script setup lang="ts">
+import Button from '~/components/ui/button/Button.vue';
+
+</script>
+
 <template>
-  <HelloWorld />
+  <Button>Click Me</Button>
 </template>
