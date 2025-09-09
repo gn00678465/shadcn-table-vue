@@ -8,6 +8,10 @@ export interface ColumnPinningOptions {
    * 初始狀態
    */
   columnPinning?: ColumnPinningState
+  /**
+   * 狀態變更回調
+   */
+  onPinningChange?: OnChangeFn<ColumnPinningState>
 }
 
 export interface UseColumnPinningReturn<TData> {
@@ -33,6 +37,8 @@ export function useColumnPinning<TData>(
         : updateOrValue
 
       _columnPinning.value = newState
+      // 觸發回調
+      options.onPinningChange?.(newState)
     },
     columnPinningConfig: {
       enableColumnPinning: true,
@@ -105,6 +111,9 @@ export function useColumnPinningWithPersist<TData>(
 
       // 保存到儲存
       savePinning()
+
+      // 觸發回調
+      options.onPinningChange?.(newState)
     },
     columnPinningConfig: {
       enableColumnPinning: true,
