@@ -9,7 +9,8 @@
     "build": "nuxt build .playground",
     "generate": "nuxt generate .playground",
     "preview": "nuxt preview .playground",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "cleanup": "nuxt cleanup .playground"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.0.0",

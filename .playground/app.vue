@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Row, ColumnDef } from '@tanstack/vue-table'
-import { DataTable, ClientOnly } from '#components'
+import { DataTable, ClientOnly, DataTableColumnHeader } from '#components'
 import { useDataTable } from '#imports'
 
 interface Person {
@@ -56,12 +56,22 @@ const columns: ColumnDef<Person>[] = [
   },
   {
     accessorKey: 'id',
-    header: 'ID',
+    header: ({ column }) => {
+      return h(DataTableColumnHeader<Person>, {
+        title: 'ID',
+        column: column,
+      })
+    },
     cell: ({ getValue }) => getValue(),
   },
   {
     accessorKey: 'firstName',
-    header: '名',
+    header: ({ column }) => {
+      return h(DataTableColumnHeader<Person>, {
+        title: '名',
+        column: column,
+      })
+    },
     cell: ({ getValue }) => getValue(),
   },
   {
@@ -150,6 +160,11 @@ const { table, pagination } = useDataTable<Person>({
       // 'id',
     ],
     right: ['age'],
+  },
+  // sorting
+  sortingOptions: {
+    manualSorting: true,
+    enableMultiSort: true,
   },
   persistOptions: {
     persistKey: 'my-table',

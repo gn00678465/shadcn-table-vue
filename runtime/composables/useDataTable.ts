@@ -5,12 +5,14 @@ import type { ColumnVisibilityOptions } from './useColumnVisibility'
 import type { Options as ExpandingOptions } from './useExpanding'
 import type { PaginationInfo, Options as PaginationOptions } from './usePagination'
 import type { Options as RowSelectionOptions } from './useRowSelection'
+import type { Options as SortingOptions } from './useSotring'
 import { getCoreRowModel, useVueTable } from '@tanstack/vue-table'
 import { useColumnPinning, useColumnPinningWithPersist } from './useColumnPinning'
 import { useColumnVisibility, useColumnVisibilityWithPersist } from './useColumnVisibility'
 import { useExpanding } from './useExpanding'
 import { usePagination } from './usePagination'
 import { useRowSelection } from './useRowSelection'
+import { useSorting } from './useSotring'
 
 export { type PaginationInfo }
 
@@ -34,7 +36,8 @@ export interface DataTableOptions<TData> extends
   RowSelectionOptions<TData>,
   ExpandingOptions<TData>,
   ColumnVisibilityOptions,
-  ColumnPinningOptions {
+  ColumnPinningOptions,
+  SortingOptions<TData> {
   /**
    * 表格列定義
    */
@@ -63,7 +66,7 @@ export interface DataTableReturn<TData> {
 }
 
 export function useDataTable<TData>(options: DataTableOptions<TData>): DataTableReturn<TData> {
-  const { paginationOptions, rowSelectionOptions, expandedOptions } = options
+  const { paginationOptions, rowSelectionOptions, expandedOptions, sortingOptions } = options
 
   // 提取持久化配置
   const persistOptions = options.persistOptions || {}
@@ -121,6 +124,13 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
         storageType,
       })
 
+  // sorting
+  const { sortingState, sortingConfig, onSortingChange } = useSorting<TData>({
+    sorting: options.sorting,
+    sortingOptions: sortingOptions,
+    onSortingChange: options?.onSortingChange,
+  })
+
   // 創建表格實例
   const table = useVueTable<TData>({
     get data() {
@@ -129,6 +139,7 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     getRowId: options.rowKey,
     initialState: {
       columnVisibility: options.columnVisibility,
+      sorting: options.sorting,
     },
     // state
     state: {
@@ -146,6 +157,9 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
       },
       get expanded() {
         return expanded.value
+      },
+      get sorting() {
+        return sortingState.value
       },
     },
     columns: options.columns,
@@ -167,6 +181,9 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     // expanded
     ...expandedConfig,
     onExpandedChange,
+    // sorting
+    ...sortingConfig,
+    onSortingChange,
   })
 
   function getDebugFlag(flag: 'table' | 'headers' | 'columns'): boolean {

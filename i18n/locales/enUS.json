@@ -4,6 +4,11 @@
     "pre_page": "{count} pre page",
     "view": "View",
     "select_all": "Select All",
-    "reset": "Reset"
+    "reset": "Reset",
+    "asc": "ASC",
+    "desc": "DESC",
+    "pin_left": "Pin Left",
+    "pin_right": "Pin Right",
+    "hide": "Hide"
   }
 }

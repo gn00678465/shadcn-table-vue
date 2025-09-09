@@ -4,6 +4,11 @@
     "pre_page": "{count} 每頁",
     "view": "檢視",
     "select_all": "全選",
-    "reset": "重置"
+    "reset": "重置",
+    "asc": "升冪",
+    "desc": "降冪",
+    "pin_left": "固定左側",
+    "pin_right": "固定右側",
+    "hide": "隱藏"
   }
 }

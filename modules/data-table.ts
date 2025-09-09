@@ -1,4 +1,4 @@
-import { addComponent, createResolver, defineNuxtModule, addImports } from 'nuxt/kit'
+import { addComponent, createResolver, defineNuxtModule, addImports } from 'nuxt/kit';
 
 export default defineNuxtModule({
   meta: {
@@ -8,7 +8,7 @@ export default defineNuxtModule({
     },
   },
   async setup(_) {
-    const resolver = createResolver(import.meta.url)
+    const resolver = createResolver(import.meta.url);
 
     // inject components
     /**
@@ -22,7 +22,7 @@ export default defineNuxtModule({
       kebabName: 'data-table', // 同時支援 kebab-case
       export: 'default',
       priority: 10, // 提高優先級以確保正確解析
-    })
+    });
 
     /**
      * 註冊 ClientDataTable 元件 (僅在 client 端渲染)
@@ -34,7 +34,7 @@ export default defineNuxtModule({
       mode: 'client', // 支援 client 端
       kebabName: 'client-data-table', // 同時支援 kebab-case
       export: 'default',
-    })
+    });
 
     addComponent({
       name: 'LazyVisibleDataTable',
@@ -42,7 +42,7 @@ export default defineNuxtModule({
       global: true, // 設為全域可用
       kebabName: 'lazy-visible-data-table', // 同時支援 kebab-case
       export: 'default',
-    })
+    });
 
     addComponent({
       name: 'DataTablePagination',
@@ -50,7 +50,7 @@ export default defineNuxtModule({
       global: true, // 設為全域可用
       kebabName: 'data-table-pagination', // 同時支援 kebab-case
       export: 'default',
-    })
+    });
 
     addComponent({
       name: 'DataTableViewOptions',
@@ -58,7 +58,15 @@ export default defineNuxtModule({
       global: true, // 設為全域可用
       kebabName: 'data-table-view-options', // 同時支援 kebab-case
       export: 'default',
-    })
+    });
+
+    addComponent({
+      name: 'DataTableColumnHeader',
+      filePath: resolver.resolve('../runtime/components/ColumnHeader.vue'),
+      global: true, // 設為全域可用
+      kebabName: 'data-table-column-header', // 同時支援 kebab-case
+      export: 'default',
+    });
 
     // inject composables
     /**
@@ -68,6 +76,6 @@ export default defineNuxtModule({
       name: 'useDataTable',
       as: 'useDataTable',
       from: resolver.resolve('../runtime/composables/useDataTable.ts'),
-    })
+    });
   },
-})
+});
