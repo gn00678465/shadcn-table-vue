@@ -1,6 +1,9 @@
 {
   "data_table": {
     "no_data_found": "No Data Found",
-    "pre_page": "{count} pre page"
+    "pre_page": "{count} pre page",
+    "view": "View",
+    "select_all": "Select All",
+    "reset": "Reset"
   }
 }

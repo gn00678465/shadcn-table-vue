@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { TableCell, TableRow } from '@/components/ui/table'
+import type { HTMLAttributes } from 'vue'
+import { cn } from '../lib/utils'
 
 defineOptions({
   name: 'DataTableLoading',
 })
 
 const props = withDefaults(defineProps<{
+  class?: HTMLAttributes['class']
   loadingColor?: string
   colspan?: number
   loading?: boolean
@@ -35,10 +37,19 @@ watch(() => props.loading, (val) => {
 </script>
 
 <template>
-  <TableRow class="border-b-0 hover:bg-transparent">
-    <TableCell
-      class="p-0 h-[2px]"
+  <tr
+    :class="cn('hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors', 'border-b-0 hover:bg-transparent', props.class)"
+    data-slot="table-loading"
+  >
+    <td
       :colspan="props.colspan"
+      data-slot="table-cell"
+      :class="
+        cn(
+          'p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
+          'p-0 h-[2px]',
+        )
+      "
     >
       <div class="loader-wrapper">
         <div
@@ -46,8 +57,8 @@ watch(() => props.loading, (val) => {
           :class="{ carousel: _loading }"
         />
       </div>
-    </TableCell>
-  </TableRow>
+    </td>
+  </tr>
 </template>
 
 <style scoped>

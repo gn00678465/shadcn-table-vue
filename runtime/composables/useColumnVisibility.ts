@@ -3,15 +3,51 @@ import type { Ref } from 'vue'
 import { ref } from 'vue'
 import { useStorage } from './useStorage'
 
-export interface TableColumnVisibilityOptions {
+export interface ColumnVisibilityOptions {
   /**
    * 初始列可見性狀態
    */
-  initialVisibility?: VisibilityState
+  columnVisibility?: VisibilityState
   /**
    * 列可見性變更回調
    */
   onVisibilityChange?: (state: VisibilityState) => void
+}
+
+export interface UseColumnVisibilityReturn {
+  columnVisibility: Ref<VisibilityState>
+  onColumnVisibilityChange: (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)) => void
+}
+
+export function useColumnVisibility(
+  options: ColumnVisibilityOptions = {},
+): UseColumnVisibilityReturn {
+  const {
+    columnVisibility = {},
+    onVisibilityChange,
+  } = options
+
+  const _columnVisibility: Ref<VisibilityState> = ref<VisibilityState>(columnVisibility)
+
+  // 列可見性變更處理
+  const onColumnVisibilityChange = (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)): void => {
+    const newState = typeof updater === 'function'
+      ? updater(_columnVisibility.value)
+      : updater
+
+    _columnVisibility.value = newState
+
+    // 觸發回調
+    onVisibilityChange?.(newState)
+  }
+
+  return {
+    columnVisibility: _columnVisibility,
+    onColumnVisibilityChange,
+  }
+}
+
+export interface ColumnVisibilityWithPersistenceOptions extends ColumnVisibilityOptions {
   /**
    * 持久化 key
    */
@@ -24,50 +60,27 @@ export interface TableColumnVisibilityOptions {
    * 儲存類型
    */
   storageType?: 'local' | 'session' | 'cookie'
-  /**
-   * 預設隱藏的欄位 ID 清單
-   */
-  initialHiddenColumns?: string[]
 }
 
-export interface UseTableColumnVisibilityReturn {
-  columnVisibility: Ref<VisibilityState>
-  initialColumnVisibility: VisibilityState
-  onColumnVisibilityChange: (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)) => void
-}
-
-export function useTableColumnVisibility(
-  options: TableColumnVisibilityOptions = {},
-): UseTableColumnVisibilityReturn {
+export function useColumnVisibilityWithPersist(
+  options: ColumnVisibilityWithPersistenceOptions = {},
+): UseColumnVisibilityReturn {
   const {
-    initialVisibility = {},
-    initialHiddenColumns = [],
+    columnVisibility = {},
     onVisibilityChange,
     persistKey,
     ssr = false,
     storageType = 'local',
   } = options
 
-  // 根據 initialHiddenColumns 生成預設隱藏狀態
-  const initialHiddenState: VisibilityState = {}
-  initialHiddenColumns.forEach((columnId) => {
-    initialHiddenState[columnId] = false
-  })
-
-  // 合併預設隱藏狀態和使用者提供的初始狀態
-  const mergedInitialVisibility: VisibilityState = {
-    ...initialHiddenState,
-    ...initialVisibility,
-  }
-
-  let columnVisibility: Ref<VisibilityState>
+  let _columnVisibility: Ref<VisibilityState>
   let saveVisibility: () => void = () => {}
 
   // 如果提供了持久化 key，使用 useStorage
   if (persistKey) {
     const storage = useStorage<VisibilityState>(
       persistKey,
-      mergedInitialVisibility,
+      columnVisibility,
       {
         type: storageType,
         ssr,
@@ -80,21 +93,21 @@ export function useTableColumnVisibility(
         debounceDelay: 500,
       },
     )
-    columnVisibility = storage.data
+    _columnVisibility = storage.data
     saveVisibility = storage.debouncedSave
   }
   else {
     // 沒有持久化，使用普通 ref
-    columnVisibility = ref<VisibilityState>(mergedInitialVisibility)
+    _columnVisibility = ref<VisibilityState>(columnVisibility)
   }
 
   // 列可見性變更處理
   const onColumnVisibilityChange = (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)): void => {
     const newState = typeof updater === 'function'
-      ? updater(columnVisibility.value)
+      ? updater(_columnVisibility.value)
       : updater
 
-    columnVisibility.value = newState
+    _columnVisibility.value = newState
 
     // 保存到儲存
     saveVisibility()
@@ -104,8 +117,7 @@ export function useTableColumnVisibility(
   }
 
   return {
-    columnVisibility,
-    initialColumnVisibility: mergedInitialVisibility,
+    columnVisibility: _columnVisibility,
     onColumnVisibilityChange,
   }
 }

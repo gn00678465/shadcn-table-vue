@@ -1,16 +1,16 @@
 import type { ColumnDef, Row, Table } from '@tanstack/vue-table'
 import type { Ref } from 'vue'
-import type { TableColumnPinningOptions } from './useColumnPinning'
-import type { TableColumnVisibilityOptions } from './useColumnVisibility'
-import type { TableExpandingOptions } from './useExpanding'
-import type { PaginationInfo, TablePaginationOptions } from './usePagination'
-import type { TableRowSelectionOptions } from './useRowSelection'
+import type { ColumnPinningOptions } from './useColumnPinning'
+import type { ColumnVisibilityOptions } from './useColumnVisibility'
+import type { Options as ExpandingOptions } from './useExpanding'
+import type { PaginationInfo, Options as PaginationOptions } from './usePagination'
+import type { Options as RowSelectionOptions } from './useRowSelection'
 import { getCoreRowModel, useVueTable } from '@tanstack/vue-table'
-import { useTableColumnPinning } from './useColumnPinning'
-import { useTableColumnVisibility } from './useColumnVisibility'
-import { useTableExpanding } from './useExpanding'
-import { useTablePagination } from './usePagination'
-import { useTableRowSelection } from './useRowSelection'
+import { useColumnPinning, useColumnPinningWithPersist } from './useColumnPinning'
+import { useColumnVisibility, useColumnVisibilityWithPersist } from './useColumnVisibility'
+import { useExpanding } from './useExpanding'
+import { usePagination } from './usePagination'
+import { useRowSelection } from './useRowSelection'
 
 export { type PaginationInfo }
 
@@ -30,11 +30,11 @@ export interface PersistOptions {
 }
 
 export interface DataTableOptions<TData> extends
-  TablePaginationOptions,
-  TableRowSelectionOptions<TData>,
-  Omit<TableColumnVisibilityOptions, 'persistKey' | 'ssr' | 'storageType'>,
-  Omit<TableColumnPinningOptions, 'persistKey' | 'ssr' | 'storageType'>,
-  TableExpandingOptions<TData> {
+  PaginationOptions,
+  RowSelectionOptions<TData>,
+  ExpandingOptions<TData>,
+  ColumnVisibilityOptions,
+  ColumnPinningOptions {
   /**
    * 表格列定義
    */
@@ -53,6 +53,8 @@ export interface DataTableOptions<TData> extends
    * 持久化設定
    */
   persistOptions?: PersistOptions
+  // debug
+  debug?: boolean | Partial<Record<'table' | 'headers' | 'columns', boolean>>
 }
 
 export interface DataTableReturn<TData> {
@@ -61,6 +63,8 @@ export interface DataTableReturn<TData> {
 }
 
 export function useDataTable<TData>(options: DataTableOptions<TData>): DataTableReturn<TData> {
+  const { paginationOptions, rowSelectionOptions, expandedOptions } = options
+
   // 提取持久化配置
   const persistOptions = options.persistOptions || {}
   const persistKey = persistOptions.persistKey || '' // 向下兼容
@@ -68,55 +72,63 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
   const storageType = persistOptions.storageType || 'local'
 
   // 分頁邏輯
-  const { pagination, paginationConfig, paginationInfo, onPaginationChange } = useTablePagination<TData>({
-    remote: options.remote,
-    itemCount: options.itemCount,
-    initialPagination: options.initialPagination,
-    onPageChange: options.onPageChange,
-    onPageSizeChange: options.onPageSizeChange,
+  const { pagination, paginationConfig, paginationInfo, onPaginationChange } = usePagination<TData>({
+    pagination: options.pagination,
+    paginationOptions,
+    onPageChange: options?.onPageChange,
+    onPageSizeChange: options?.onPageSizeChange,
   })
 
   // row selection
-  const { rowSelection, onRowSelectionChange, rowSelectionConfig } = useTableRowSelection<TData>({
-    multi: options.multi,
-    initialRowSelection: options.initialRowSelection,
-    onUpdateCheckedRowKeys: options.onUpdateCheckedRowKeys,
-    enableRowSelection: true,
-  })
-
-  // 列可見性邏輯
-  const { columnVisibility, initialColumnVisibility, onColumnVisibilityChange } = useTableColumnVisibility({
-    initialVisibility: options.initialVisibility,
-    initialHiddenColumns: options.initialHiddenColumns,
-    onVisibilityChange: options.onVisibilityChange,
-    persistKey,
-    ssr,
-    storageType,
-  })
-
-  // column pinning
-  const { columnPinning, onColumnPinningChange, columnPinningConfig } = useTableColumnPinning({
-    initialPinning: options.initialPinning,
-    persistKey,
-    ssr,
-    storageType,
+  const { rowSelection, onRowSelectionChange, rowSelectionConfig } = useRowSelection<TData>({
+    rowSelection: options.rowSelection,
+    rowSelectionOptions: rowSelectionOptions,
+    onUpdateCheckedRowKeys: options?.onUpdateCheckedRowKeys,
   })
 
   // expanding
-  const { onExpandedChange, expanded, expandedConfig } = useTableExpanding({
-    initialExpanded: options.initialExpanded,
-    enableExpanding: options.enableExpanding,
-    onUpdateExpandedKeys: options.onUpdateExpandedKeys,
+  const { onExpandedChange, expanded, expandedConfig } = useExpanding({
+    expanded: options.expanded,
+    expandedOptions: expandedOptions,
+    onUpdateExpandedKeys: options?.onUpdateExpandedKeys,
   })
 
+  // 列可見性邏輯
+  const { columnVisibility, onColumnVisibilityChange } = !options.persistOptions
+    ? useColumnVisibility({
+        columnVisibility: options.columnVisibility,
+        onVisibilityChange: options?.onVisibilityChange,
+      })
+    : useColumnVisibilityWithPersist({
+        columnVisibility: options.columnVisibility,
+        onVisibilityChange: options?.onVisibilityChange,
+        persistKey,
+        ssr,
+        storageType,
+      })
+
+  // column pinning
+  const { columnPinning, onColumnPinningChange, columnPinningConfig } = !options.persistOptions
+    ? useColumnPinning({
+        columnPinning: options.columnPinning,
+        onPinningChange: options?.onPinningChange,
+      })
+    : useColumnPinningWithPersist({
+        columnPinning: options.columnPinning,
+        onPinningChange: options?.onPinningChange,
+        persistKey,
+        ssr,
+        storageType,
+      })
+
   // 創建表格實例
-  const table = useVueTable({
+  const table = useVueTable<TData>({
     get data() {
       return options.data.value
     },
     getRowId: options.rowKey,
     initialState: {
-      columnVisibility: initialColumnVisibility,
+      columnVisibility: options.columnVisibility,
     },
     // state
     state: {
@@ -138,9 +150,9 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     },
     columns: options.columns,
     getCoreRowModel: getCoreRowModel(),
-    debugTable: import.meta.env.DEV,
-    debugHeaders: import.meta.env.DEV,
-    debugColumns: import.meta.env.DEV,
+    debugTable: getDebugFlag('table'),
+    debugHeaders: getDebugFlag('headers'),
+    debugColumns: getDebugFlag('columns'),
     // pagination
     ...paginationConfig,
     onPaginationChange,
@@ -156,6 +168,16 @@ export function useDataTable<TData>(options: DataTableOptions<TData>): DataTable
     ...expandedConfig,
     onExpandedChange,
   })
+
+  function getDebugFlag(flag: 'table' | 'headers' | 'columns'): boolean {
+    if (typeof options.debug === 'boolean') {
+      return options.debug
+    }
+    if (typeof options.debug === 'object' && options.debug !== null) {
+      return options.debug[flag] || false
+    }
+    return false
+  }
 
   return {
     table,

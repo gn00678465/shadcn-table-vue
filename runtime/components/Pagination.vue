@@ -24,10 +24,6 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 
-defineOptions({
-  name: 'DataTablePagination',
-})
-
 export const dataTablePaginationVariants = cva('p-0', {
   variants: {
     size: {
@@ -36,7 +32,7 @@ export const dataTablePaginationVariants = cva('p-0', {
       sm: 'h-7 w-7 text-sm',
     },
     disabled: {
-      true: 'disabled:cursor-not-allowed',
+      true: 'disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:pointer-events-auto',
       false: '',
     },
   },
@@ -97,6 +93,10 @@ const props = withDefaults(defineProps<DataTablePaginationProps<TData>>(), {
 const slots = defineSlots<{
   prefix: (info: PaginationInfo) => any
   suffix: (info: PaginationInfo) => any
+  first: () => any
+  previous: () => any
+  next: () => any
+  last: () => any
 }>()
 
 const { t } = useI18n()
@@ -143,16 +143,24 @@ const paginationInfo = computed<PaginationInfo>(() => {
         class="flex items-center gap-1"
       >
         <PaginationFirst
-          v-if="!props.showEdges"
-          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: props.isFirstPage || props.disabled }))"
+          v-if="props.showEdges"
+          :class="cn('[&>span]:hidden', dataTablePaginationVariants({ size: props.size, disabled: props.isFirstPage || props.disabled }))"
           :disabled="props.isFirstPage || props.disabled"
           @click="table.setPageIndex(0)"
-        />
+        >
+          <template #default>
+            <slot name="first" />
+          </template>
+        </PaginationFirst>
         <PaginationPrevious
-          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: props.isFirstPage || props.disabled }))"
+          :class="cn('[&>span]:hidden', dataTablePaginationVariants({ size: props.size, disabled: props.isFirstPage || props.disabled }))"
           :disabled="props.isFirstPage || props.disabled"
           @click="table.previousPage()"
-        />
+        >
+          <template #default>
+            <slot name="previous" />
+          </template>
+        </PaginationPrevious>
 
         <template v-for="(item, index) in items">
           <PaginationItem
@@ -180,16 +188,24 @@ const paginationInfo = computed<PaginationInfo>(() => {
         </template>
 
         <PaginationNext
-          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: props.isLastPage || props.disabled }))"
+          :class="cn('[&>span]:hidden', dataTablePaginationVariants({ size: props.size, disabled: props.isLastPage || props.disabled }))"
           :disabled="props.isLastPage || props.disabled"
           @click="table.nextPage()"
-        />
+        >
+          <template #default>
+            <slot name="next" />
+          </template>
+        </PaginationNext>
         <PaginationLast
-          v-if="!props.showEdges"
-          :class="cn(dataTablePaginationVariants({ size: props.size, disabled: props.isLastPage || props.disabled }))"
+          v-if="props.showEdges"
+          :class="cn('[&>span]:hidden', dataTablePaginationVariants({ size: props.size, disabled: props.isLastPage || props.disabled }))"
           :disabled="props.isLastPage || props.disabled"
           @click="table.setPageIndex(table.getPageCount() - 1)"
-        />
+        >
+          <template #default>
+            <slot name="last" />
+          </template>
+        </PaginationLast>
       </PaginationContent>
     </Pagination>
     <div class="flex items-center space-x-2">

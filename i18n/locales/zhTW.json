@@ -1,6 +1,9 @@
 {
   "data_table": {
     "no_data_found": "沒有符合條件的資料",
-    "pre_page": "{count} 每頁"
+    "pre_page": "{count} 每頁",
+    "view": "檢視",
+    "select_all": "全選",
+    "reset": "重置"
   }
 }

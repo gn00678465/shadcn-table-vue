@@ -3,11 +3,44 @@ import type { Ref } from 'vue'
 import { ref } from 'vue'
 import { useStorage } from './useStorage'
 
-export interface TableColumnPinningOptions {
+export interface ColumnPinningOptions {
   /**
    * 初始狀態
    */
-  initialPinning?: ColumnPinningState
+  columnPinning?: ColumnPinningState
+}
+
+export interface UseColumnPinningReturn<TData> {
+  columnPinning: Ref<ColumnPinningState>
+  onColumnPinningChange: OnChangeFn<ColumnPinningState>
+  columnPinningConfig: Pick<TableOptions<TData>, 'enableColumnPinning'>
+}
+
+export function useColumnPinning<TData>(
+  options: ColumnPinningOptions = {},
+): UseColumnPinningReturn<TData> {
+  const {
+    columnPinning = {},
+  } = options
+
+  const _columnPinning: Ref<ColumnPinningState> = ref<ColumnPinningState>(columnPinning)
+
+  return {
+    columnPinning: _columnPinning,
+    onColumnPinningChange: (updateOrValue) => {
+      const newState = typeof updateOrValue === 'function'
+        ? updateOrValue(_columnPinning.value)
+        : updateOrValue
+
+      _columnPinning.value = newState
+    },
+    columnPinningConfig: {
+      enableColumnPinning: true,
+    },
+  }
+}
+
+export interface TableColumnPinningWithPersistOptions extends ColumnPinningOptions {
   /**
    * 持久化 key
    */
@@ -22,30 +55,24 @@ export interface TableColumnPinningOptions {
   storageType?: 'local' | 'session' | 'cookie'
 }
 
-export interface UseTableColumnPinningReturn<TData> {
-  columnPinning: Ref<ColumnPinningState>
-  onColumnPinningChange: OnChangeFn<ColumnPinningState>
-  columnPinningConfig: Pick<TableOptions<TData>, 'enableColumnPinning'>
-}
-
-export function useTableColumnPinning<TData>(
-  options: TableColumnPinningOptions = {},
-): UseTableColumnPinningReturn<TData> {
+export function useColumnPinningWithPersist<TData>(
+  options: TableColumnPinningWithPersistOptions = {},
+): UseColumnPinningReturn<TData> {
   const {
-    initialPinning = {},
+    columnPinning = {},
     persistKey,
     ssr = false,
     storageType = 'local',
   } = options
 
-  let columnPinning: Ref<ColumnPinningState>
+  let _columnPinning: Ref<ColumnPinningState>
   let savePinning: () => void = () => {}
 
   // 如果提供了持久化 key，使用 useStorage
   if (persistKey) {
     const storage = useStorage<ColumnPinningState>(
       persistKey,
-      initialPinning,
+      columnPinning,
       {
         type: storageType,
         ssr,
@@ -59,22 +86,22 @@ export function useTableColumnPinning<TData>(
       },
     )
 
-    columnPinning = storage.data
+    _columnPinning = storage.data
     savePinning = storage.debouncedSave
   }
   else {
     // 沒有持久化，使用普通 ref
-    columnPinning = ref<ColumnPinningState>(initialPinning)
+    _columnPinning = ref<ColumnPinningState>(columnPinning)
   }
 
   return {
-    columnPinning,
+    columnPinning: _columnPinning,
     onColumnPinningChange: (updateOrValue) => {
       const newState = typeof updateOrValue === 'function'
-        ? updateOrValue(columnPinning.value)
+        ? updateOrValue(_columnPinning.value)
         : updateOrValue
 
-      columnPinning.value = newState
+      _columnPinning.value = newState
 
       // 保存到儲存
       savePinning()

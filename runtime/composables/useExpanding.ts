@@ -4,35 +4,37 @@ import { getExpandedRowModel } from '@tanstack/vue-table'
 import { ref, watch } from 'vue'
 import { valueUpdater } from '../lib/utils'
 
-export interface TableExpandingOptions<TData> {
+export interface Options<TData> {
   /**
    * 初始展開狀態
    */
-  initialExpanded?: Ref<string[]>
-  /**
+  expanded?: Ref<string[]>
+  expandedOptions?: {
+    /**
    *
    * @param row
    * @returns
    */
-  enableExpanding?: boolean | ((row?: Row<TData>) => boolean)
+    enableExpanding?: boolean | ((row?: Row<TData>) => boolean)
+  }
   /**
    * 展開項變更後的回調函數
    */
   onUpdateExpandedKeys?: (arg: Array<string>) => void | Promise<void>
 }
 
-export interface UseTableExpandingReturn<TData> {
+export interface UseExpandingReturn<TData> {
   expanded: Ref<ExpandedState>
   onExpandedChange: OnChangeFn<ExpandedState>
   expandedConfig: Pick<TableOptions<TData>, 'getExpandedRowModel' | 'getRowCanExpand'>
 }
 
-export function useTableExpanding<TData>(options: TableExpandingOptions<TData> = {}): UseTableExpandingReturn<TData> {
+export function useExpanding<TData>(options: Options<TData> = {}): UseExpandingReturn<TData> {
   const expanded = ref(initialExpanded())
 
   function initialExpanded(): ExpandedState {
-    return options.initialExpanded?.value
-      ? options.initialExpanded.value.reduce((acc, cur) => {
+    return options.expanded?.value
+      ? options.expanded.value.reduce((acc, cur) => {
           acc[cur] = true
           return acc
         }, {} as Record<string, boolean>)
@@ -51,10 +53,10 @@ export function useTableExpanding<TData>(options: TableExpandingOptions<TData> =
     expanded,
     onExpandedChange,
     expandedConfig: {
-      getRowCanExpand: typeof options.enableExpanding === 'boolean' && options.enableExpanding === true
+      getRowCanExpand: typeof options.expandedOptions?.enableExpanding === 'boolean' && options.expandedOptions?.enableExpanding === true
         ? () => true
-        : typeof options.enableExpanding === 'function'
-          ? options.enableExpanding
+        : typeof options.expandedOptions?.enableExpanding === 'function'
+          ? options.expandedOptions?.enableExpanding
           : undefined,
       getExpandedRowModel: getExpandedRowModel(),
     },

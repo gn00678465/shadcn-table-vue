@@ -73,7 +73,7 @@ function onReset() {
         class="hidden gap-2 focus:outline-none focus:ring-1 focus:ring-ring focus-visible:ring-0 lg:inline-flex"
       >
         <Settings2 class="size-4" />
-        {{ t('common.view') }}
+        {{ t('data_table.view') }}
         <ChevronsUpDown class="ml-auto size-4 shrink-0 opacity-50" />
       </Button>
       <slot
@@ -104,7 +104,7 @@ function onReset() {
               <template v-else>
                 <component :is="props.renderCheckbox(checkStatus)" />
               </template>
-              <span class="truncate">{{ t('common.select_all') }}</span>
+              <span class="truncate">{{ t('data_table.select_all') }}</span>
             </CommandItem>
           </CommandGroup>
 
@@ -149,7 +149,7 @@ function onReset() {
                 class="w-full"
                 @click="onReset"
               >
-                {{ t('common.reset') }}
+                {{ t('data_table.reset') }}
               </Button>
             </CommandItem>
           </CommandGroup>

@@ -3,38 +3,40 @@ import type { Ref } from 'vue'
 import { ref, watch } from 'vue'
 import { valueUpdater } from '../lib/utils'
 
-export interface TableRowSelectionOptions<TData> {
+export interface Options<TData> {
   /**
    * 初始選擇狀態
    */
-  initialRowSelection?: Ref<string[]>
-  /**
+  rowSelection?: Ref<string[]>
+  rowSelectionOptions?: {
+    /**
    * 是否啟用選擇
    */
-  enableRowSelection?: boolean | ((row: Row<TData>) => boolean)
-  /**
+    enableRowSelection?: boolean | ((row: Row<TData>) => boolean)
+    /**
    * 是否為為多選
    */
-  multi?: boolean
+    multi?: boolean
+  }
   /**
    * 選擇項變更後的回調函數
    */
   onUpdateCheckedRowKeys?: (arg: Array<string>) => void | Promise<void>
 }
 
-export interface UseTableRowSelectionReturn<TData> {
+export interface UseRowSelectionReturn<TData> {
   rowSelection: Ref<RowSelectionState>
   onRowSelectionChange: OnChangeFn<RowSelectionState>
   resetRowSelection: () => void
   rowSelectionConfig: Pick<TableOptions<TData>, 'enableMultiRowSelection' | 'paginateExpandedRows' | 'enableRowSelection'>
 }
 
-export function useTableRowSelection<TData>(options: TableRowSelectionOptions<TData>): UseTableRowSelectionReturn<TData> {
+export function useRowSelection<TData>(options: Options<TData>): UseRowSelectionReturn<TData> {
   const rowSelection = ref(initialRowSelection())
 
   function initialRowSelection(): RowSelectionState {
-    return options.initialRowSelection?.value
-      ? options.initialRowSelection.value.reduce((acc, cur) => {
+    return options.rowSelection?.value
+      ? options.rowSelection.value.reduce((acc, cur) => {
           acc[cur] = true
           return acc
         }, {} as RowSelectionState)
@@ -58,9 +60,9 @@ export function useTableRowSelection<TData>(options: TableRowSelectionOptions<TD
     onRowSelectionChange,
     resetRowSelection,
     rowSelectionConfig: {
-      enableMultiRowSelection: options.multi,
+      enableMultiRowSelection: options.rowSelectionOptions?.multi,
       paginateExpandedRows: false,
-      enableRowSelection: options.enableRowSelection,
+      enableRowSelection: options.rowSelectionOptions?.enableRowSelection,
     },
   }
 }

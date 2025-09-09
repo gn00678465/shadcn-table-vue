@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-shadcn-data-table",
+  "name": "nuxt-shadcn-table",
   "type": "module",
   "version": "0.0.1",
   "main": "./nuxt.config.ts",
@@ -12,6 +12,7 @@
     "lint": "eslint ."
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.0.0",
     "@nuxt/eslint": "latest",
     "@nuxtjs/i18n": "10.0.6",
     "eslint": "^9.34.0",

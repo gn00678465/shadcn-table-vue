@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { TableCell, TableRow } from '@/components/ui/table'
+import type { HTMLAttributes } from 'vue'
+import { cn } from '../lib/utils'
 
 defineOptions({
   name: 'DataTableEmpty',
 })
 
 const props = withDefaults(defineProps<{
+  class?: HTMLAttributes['class']
   colspan?: number
 }>(), {
   colspan: 1,
@@ -13,11 +15,15 @@ const props = withDefaults(defineProps<{
 </script>
 
 <template>
-  <TableRow
-    class="border-b-0 hover:bg-transparent"
+  <tr
+    :class="cn('hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors', 'border-b-0 hover:bg-transparent', props.class)"
     data-slot="empty-table-row"
   >
-    <TableCell :colspan="props.colspan">
+    <td
+      :colspan="props.colspan"
+      data-slot="table-cell"
+      :class="cn('p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]')"
+    >
       <slot>
         <div class="py-4">
           <div class="flex flex-col items-center justify-center text-center">
@@ -37,8 +43,8 @@ const props = withDefaults(defineProps<{
           </div>
         </div>
       </slot>
-    </TableCell>
-  </TableRow>
+    </td>
+  </tr>
 </template>
 
 <style lang="scss" scoped>

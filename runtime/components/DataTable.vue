@@ -45,7 +45,6 @@ export interface DataTableProps<TData> {
   themeOverrides?: ThemeOverrides
   //
   loading?: boolean
-  loadingColor?: string
 }
 
 export interface ThemeOverrides {
@@ -53,6 +52,7 @@ export interface ThemeOverrides {
   tdColorHover?: string
   thColor?: string
   thColorHover?: string
+  loadingColor?: string
 }
 </script>
 
@@ -225,7 +225,7 @@ const vScrollSync: Directive<HTMLDivElement> = {
           <Loading
             :colspan="table.getVisibleLeafColumns().length"
             :loading="loading"
-            :loading-color="props.loadingColor"
+            :loading-color="themeOverrides.loadingColor"
           />
         </TableHeader>
         <TableBody class="relative">
@@ -332,7 +332,7 @@ const vScrollSync: Directive<HTMLDivElement> = {
             <Loading
               :colspan="table.getVisibleLeafColumns().length"
               :loading="loading"
-              :loading-color="props.loadingColor"
+              :loading-color="themeOverrides.loadingColor"
             />
           </TableHeader>
         </table>

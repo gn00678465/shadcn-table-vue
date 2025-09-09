@@ -5,22 +5,24 @@ import { useClamp } from '@vueuse/math'
 import { computed, ref, toValue, watch } from 'vue'
 import { valueUpdater } from '../lib/utils'
 
-export interface TablePaginationOptions {
+export interface Options {
   /**
    * 初始分頁狀態
    */
-  initialPagination?: {
+  pagination?: {
     pageIndex: number
     pageSize: number
   }
-  /**
+  paginationOptions?: {
+    /**
    * 是否為遠程數據模式
    */
-  remote?: boolean
-  /**
+    remote?: boolean
+    /**
    * 遠程數據總數
    */
-  itemCount?: MaybeRefOrGetter<number>
+    itemCount?: MaybeRefOrGetter<number>
+  }
   /**
    * 分頁變更回調
    */
@@ -43,26 +45,28 @@ export interface PaginationInfo {
   isLastPage: boolean
 }
 
-export interface UseTablePaginationReturn<TData> {
+export interface UsePaginationReturn<TData> {
   pagination: Ref<PaginationState>
   paginationInfo: PaginationInfo
-  paginationConfig: Pick<TableOptions<TData>, 'manualPagination'
+  paginationConfig: Pick<TableOptions<TData>,
+  | 'manualPagination'
   | 'pageCount'
   | 'rowCount'
   | 'getPaginationRowModel'
-  | 'autoResetPageIndex'>
+  | 'autoResetPageIndex'
+  >
   onPaginationChange: OnChangeFn<PaginationState>
 }
 
-export function useTablePagination<TData>(options: TablePaginationOptions = {}): UseTablePaginationReturn<TData> {
+export function usePagination<TData>(options: Options = {}): UsePaginationReturn<TData> {
   // 分頁狀態
   const pagination = ref<PaginationState>({
-    pageIndex: options.initialPagination?.pageIndex ?? 0,
-    pageSize: options.initialPagination?.pageSize ?? 10,
+    pageIndex: options.pagination?.pageIndex ?? 0,
+    pageSize: options.pagination?.pageSize ?? 10,
   })
 
   // 計算總頁數
-  const itemCount = computed(() => toValue(options.itemCount) ?? 0)
+  const itemCount = computed(() => toValue(options?.paginationOptions?.itemCount) ?? 0)
   const pageCount = computed(() => Math.max(
     1,
     Math.ceil((toValue(itemCount)) / toValue(pagination).pageSize),
@@ -81,7 +85,7 @@ export function useTablePagination<TData>(options: TablePaginationOptions = {}):
   })
 
   // 監聽分頁變更
-  if (options.remote) {
+  if (options.paginationOptions?.remote) {
     // 監聽頁碼變更
     watch(
       () => pagination.value.pageIndex,
@@ -110,9 +114,9 @@ export function useTablePagination<TData>(options: TablePaginationOptions = {}):
     paginationInfo,
     // 表格配置
     paginationConfig: {
-      manualPagination: options.remote,
+      manualPagination: options.paginationOptions?.remote,
       rowCount: itemCount.value,
-      getPaginationRowModel: options.remote ? undefined : getPaginationRowModel(),
+      getPaginationRowModel: options.paginationOptions?.remote ? undefined : getPaginationRowModel(),
       autoResetPageIndex: false,
     },
     onPaginationChange: (updater) => {

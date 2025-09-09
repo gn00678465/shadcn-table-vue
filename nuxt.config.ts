@@ -7,5 +7,6 @@ export default defineNuxtConfig({
       { code: 'en-US', file: 'enUS.json' },
       { code: 'zh-TW', file: 'zhTW.json' },
     ],
+    defaultLocale: 'zh-TW',
   },
-})
+});

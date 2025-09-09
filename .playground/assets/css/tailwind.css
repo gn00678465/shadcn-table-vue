@@ -1,5 +1,9 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
 @import "tw-animate-css";
+
+@source "../../app.vue";
+@source "../../components";
+@source "../../../runtime";
 
 @custom-variant dark (&:is(.dark *));
 
