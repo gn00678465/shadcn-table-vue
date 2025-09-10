@@ -7,24 +7,20 @@ import { computed, useTemplateRef } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
-  Command,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from '@/components/ui/command'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 export interface DataTableViewOptionsProps<TData> {
   table: Table<TData>
   renderLabel?: (col: Column<TData>) => VNodeChild
   renderCheckbox?: (value: boolean | 'indeterminate') => VNodeChild
-  triggerProps?: ButtonVariants & { class?: HTMLAttributes['class'] }
+  triggerButtonProps?: ButtonVariants & { class?: HTMLAttributes['class'] }
+  resetButtonProps?: ButtonVariants & { class?: HTMLAttributes['class'] }
 }
 </script>
 
@@ -36,10 +32,15 @@ defineOptions({
 const props = withDefaults(defineProps<DataTableViewOptionsProps<TData>>(), {
   renderTrigger: undefined,
   renderLabel: undefined,
-  triggerProps: () => ({
+  triggerButtonProps: () => ({
     size: 'sm',
     variant: 'outline',
-    class: '',
+    class: 'h-7',
+  }),
+  resetButtonProps: () => ({
+    size: 'sm',
+    variant: 'outline',
+    class: 'h-7',
   }),
 })
 
@@ -48,7 +49,6 @@ const slots = defineSlots<{
 }>()
 
 const triggerRef = useTemplateRef('triggerRef')
-
 const { t } = useI18n()
 
 const checkStatus = computed(() => {
@@ -61,16 +61,15 @@ function onReset() {
 </script>
 
 <template>
-  <Popover modal>
-    <PopoverTrigger as-child>
+  <DropdownMenu modal>
+    <DropdownMenuTrigger as-child>
       <Button
         v-if="!slots.trigger"
         ref="triggerRef"
         aria-label="Toggle columns"
-        variant="outline"
         role="combobox"
-        size="sm"
-        class="hidden gap-2 focus:outline-none focus:ring-1 focus:ring-ring focus-visible:ring-0 lg:inline-flex"
+        class="cursor-pointer hidden gap-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring lg:inline-flex"
+        v-bind="props.triggerButtonProps"
       >
         <Settings2 class="size-4" />
         {{ t('data_table.view') }}
@@ -83,80 +82,67 @@ function onReset() {
         role="combobox"
         aria-label="Toggle columns"
       />
-    </PopoverTrigger>
-    <PopoverContent
+    </DropdownMenuTrigger>
+    <DropdownMenuContent
       align="end"
       class="w-44 p-0"
       @close-auto-focus="() => triggerRef?.$el.focus()"
     >
-      <Command>
-        <CommandList class="overflow-visible max-h-none">
-          <!-- Select All 選項固定在頂部 -->
-          <CommandGroup>
-            <CommandItem
-              value="all"
-              class="cursor-pointer hover:bg-accent/40 transition-colors duration-200"
-              @select.stop="table.toggleAllColumnsVisible()"
-            >
-              <template v-if="!props.renderCheckbox">
-                <Checkbox :model-value="checkStatus" />
-              </template>
-              <template v-else>
-                <component :is="props.renderCheckbox(checkStatus)" />
-              </template>
-              <span class="truncate">{{ t('data_table.select_all') }}</span>
-            </CommandItem>
-          </CommandGroup>
-
-          <CommandSeparator />
-
-          <!-- 使用 ScrollArea 包裹列選項部分 -->
-          <CommandGroup as-child>
-            <ScrollArea class="h-[280px]">
-              <CommandItem
-                v-for="col of table.getAllLeafColumns().filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide())"
-                :key="col.id"
-                :value="col.id"
-                class="cursor-pointer hover:bg-accent/40 transition-colors duration-200"
-                @select.stop="() => { col.toggleVisibility(!col.getIsVisible()) }"
-              >
-                <template v-if="!props.renderCheckbox">
-                  <Checkbox :model-value="col.getIsVisible()" />
-                </template>
-                <template v-else>
-                  <component :is="props.renderCheckbox(col.getIsVisible())" />
-                </template>
-                <template v-if="!!props.renderLabel">
-                  <component :is="props.renderLabel(col)" />
-                </template>
-                <label
-                  v-else
-                  class="truncate"
-                >
-                  {{ col.id }}
-                </label>
-              </CommandItem>
-            </ScrollArea>
-          </CommandGroup>
-
-          <CommandSeparator />
-
-          <CommandGroup>
-            <CommandItem value="reset">
-              <Button
-                variant="info"
-                size="sm"
-                class="w-full"
-                @click="onReset"
-              >
-                {{ t('data_table.reset') }}
-              </Button>
-            </CommandItem>
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </PopoverContent>
-  </Popover>
+      <DropdownMenuCheckboxItem
+        class="pl-2 [&>:first-child]:hidden"
+        @select.stop="table.toggleAllColumnsVisible()"
+      >
+        <div
+          class="flex items-center gap-2 cursor-default"
+        >
+          <template v-if="!props.renderCheckbox">
+            <Checkbox :model-value="checkStatus" />
+          </template>
+          <template v-else>
+            <component :is="props.renderCheckbox(checkStatus)" />
+          </template>
+          <span class="truncate">{{ t('data_table.select_all') }}</span>
+        </div>
+      </DropdownMenuCheckboxItem>
+      <DropdownMenuSeparator />
+      <ScrollArea class="h-[192px]">
+        <DropdownMenuCheckboxItem
+          v-for="col of table.getAllLeafColumns().filter((column) => typeof column.accessorFn !== 'undefined' && column.getCanHide())"
+          :key="col.id"
+          class="pl-2 [&>:first-child]:hidden"
+          @select.stop="() => { col.toggleVisibility(!col.getIsVisible()) }"
+        >
+          <template v-if="!props.renderCheckbox">
+            <Checkbox :model-value="col.getIsVisible()" />
+          </template>
+          <template v-else>
+            <component :is="props.renderCheckbox(col.getIsVisible())" />
+          </template>
+          <template v-if="!!props.renderLabel">
+            <component :is="props.renderLabel(col)" />
+          </template>
+          <label
+            v-else
+            class="truncate"
+          >
+            {{ col.id }}
+          </label>
+        </DropdownMenuCheckboxItem>
+      </ScrollArea>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
+        class="focus:bg-transparent"
+      >
+        <Button
+          class="w-full cursor-pointer"
+          v-bind="props.resetButtonProps"
+          @click="onReset"
+        >
+          {{ t('data_table.reset') }}
+        </Button>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
 </template>
 
 <style scoped>
