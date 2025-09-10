@@ -9,9 +9,7 @@ import {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
-  PaginationFirst,
   PaginationItem,
-  PaginationLast,
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
@@ -22,29 +20,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { cn } from '@/lib/utils'
+import { cn } from '../lib/utils'
+import { First, Last } from './helpers/Pagination'
 
-export const dataTablePaginationVariants = cva('p-0', {
+export const paginationVariants = cva('p-0', {
   variants: {
     size: {
-      lg: 'h-10 w-10',
-      default: 'h-8 w-8',
-      sm: 'h-7 w-7 text-sm',
+      lg: 'h-10 w-10 size-10',
+      default: 'h-8 w-8 size-8',
+      sm: 'h-7 w-7 text-sm size-7',
     },
     disabled: {
       true: 'disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:pointer-events-auto',
       false: '',
     },
+    activated: {
+      true: 'border-primary text-primary hover:border-primary hover:enabled:text-primary hover:bg-transparent',
+      false: 'cursor-pointer',
+    },
   },
   defaultVariants: {
     size: 'default',
     disabled: false,
+    activated: false,
   },
 })
 
-export type DataTablePaginationVariants = VariantProps<typeof dataTablePaginationVariants>
+export type PaginationVariants = VariantProps<typeof paginationVariants>
 
-export interface DataTablePaginationProps<TData> {
+export interface PaginationProps<TData> {
   table: Table<TData>
   page?: number
   pageSize?: number
@@ -53,7 +57,7 @@ export interface DataTablePaginationProps<TData> {
   itemCount?: number
   showEdges?: boolean
   disabled?: boolean
-  size?: DataTablePaginationVariants['size']
+  size?: PaginationVariants['size']
   prefix?: (info: PaginationInfo) => VNodeChild
   suffix?: (info: PaginationInfo) => VNodeChild
   isFirstPage?: boolean
@@ -75,7 +79,7 @@ defineOptions({
   name: 'DataTablePagination',
 })
 
-const props = withDefaults(defineProps<DataTablePaginationProps<TData>>(), {
+const props = withDefaults(defineProps<PaginationProps<TData>>(), {
   page: 1,
   pageSize: 10,
   pageCount: 1,
@@ -83,7 +87,7 @@ const props = withDefaults(defineProps<DataTablePaginationProps<TData>>(), {
   itemCount: 0,
   showEdges: true,
   disabled: false,
-  size: undefined,
+  size: 'default',
   prefix: undefined,
   suffix: undefined,
   isFirstPage: false,
@@ -111,6 +115,8 @@ const paginationInfo = computed<PaginationInfo>(() => {
     endIndex: props.isLastPage ? props.itemCount : props.page * props.pageSize,
   }
 })
+
+const edgeButtonClass = '[&>span]:hidden [&>span]:sr-only border bg-background shadow-xs dark:bg-input/30 dark:border-input'
 </script>
 
 <template>
@@ -140,20 +146,20 @@ const paginationInfo = computed<PaginationInfo>(() => {
     >
       <PaginationContent
         v-slot="{ items }"
-        class="flex items-center gap-1"
+        class="flex items-center gap-1 py-0"
       >
-        <PaginationFirst
+        <First
           v-if="props.showEdges"
-          :class="cn('[&>span]:hidden', dataTablePaginationVariants({ size: props.size, disabled: props.isFirstPage || props.disabled }))"
+          :class="cn(edgeButtonClass, paginationVariants({ size: props.size, disabled: props.isFirstPage || props.disabled }))"
           :disabled="props.isFirstPage || props.disabled"
           @click="table.setPageIndex(0)"
         >
           <template #default>
             <slot name="first" />
           </template>
-        </PaginationFirst>
+        </First>
         <PaginationPrevious
-          :class="cn('[&>span]:hidden', dataTablePaginationVariants({ size: props.size, disabled: props.isFirstPage || props.disabled }))"
+          :class="cn(edgeButtonClass, paginationVariants({ size: props.size, disabled: props.isFirstPage || props.disabled }))"
           :disabled="props.isFirstPage || props.disabled"
           @click="table.previousPage()"
         >
@@ -171,8 +177,7 @@ const paginationInfo = computed<PaginationInfo>(() => {
           >
             <Button
               :class="
-                cn(dataTablePaginationVariants({ size: props.size, disabled: props.disabled }),
-                   item.value === currentPage ? 'border-primary text-primary hover:border-primary hover:enabled:text-primary hover:bg-transparent' : undefined,
+                cn(paginationVariants({ size: props.size, disabled: props.disabled, activated: item.value === currentPage }),
                 )"
               variant="outline"
               @click="table.setPageIndex(item.value - 1)"
@@ -184,11 +189,12 @@ const paginationInfo = computed<PaginationInfo>(() => {
             v-else
             :key="item.type"
             :index="index"
+            :class="cn(paginationVariants({ size: props.size }), 'rounded-md')"
           />
         </template>
 
         <PaginationNext
-          :class="cn('[&>span]:hidden', dataTablePaginationVariants({ size: props.size, disabled: props.isLastPage || props.disabled }))"
+          :class="cn(edgeButtonClass, paginationVariants({ size: props.size, disabled: props.isLastPage || props.disabled }))"
           :disabled="props.isLastPage || props.disabled"
           @click="table.nextPage()"
         >
@@ -196,16 +202,16 @@ const paginationInfo = computed<PaginationInfo>(() => {
             <slot name="next" />
           </template>
         </PaginationNext>
-        <PaginationLast
+        <Last
           v-if="props.showEdges"
-          :class="cn('[&>span]:hidden', dataTablePaginationVariants({ size: props.size, disabled: props.isLastPage || props.disabled }))"
+          :class="cn(edgeButtonClass, paginationVariants({ size: props.size, disabled: props.isLastPage || props.disabled }))"
           :disabled="props.isLastPage || props.disabled"
           @click="table.setPageIndex(table.getPageCount() - 1)"
         >
           <template #default>
             <slot name="last" />
           </template>
-        </PaginationLast>
+        </Last>
       </PaginationContent>
     </Pagination>
     <div class="flex items-center space-x-2">
@@ -215,8 +221,14 @@ const paginationInfo = computed<PaginationInfo>(() => {
         @update:model-value="(pageSize) => { table.setPageSize(Number(pageSize)) }"
       >
         <SelectTrigger
-          :class="cn(dataTablePaginationVariants({ size: props.size }),
-                     'w-[auto] px-2', 'focus:ring-0 focus:ring-none focus:ring-offset-0')"
+          :class="cn(
+            'w-[auto] px-2', 'focus-visible:ring-0 focus-visible:ring-none focus-visible:ring-offset-0',
+            { 'data-[size=lg]:h-10': props.size === 'lg' },
+            { 'data-[size=default]:h-8': props.size === 'default' },
+            { 'data-[size=sm]:h-7 text-sm': props.size === 'sm' },
+          )"
+          :data-size="props.size"
+          :disabled="props.disabled"
         >
           <SelectValue :placeholder="`${props.table.getState().pagination.pageSize} pre page`">
             {{ t('data_table.pre_page', table.getState().pagination.pageSize) }}

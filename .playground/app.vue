@@ -200,12 +200,14 @@ const { table, pagination } = useDataTable<Person>({
           <DataTableViewOptions :table="table" />
         </div>
         <DataTable
+          :style="{ 'max-height': '100%', 'height': '600px' }"
           :loading="status === 'pending'"
           :table="table"
           :render-expanded="(row) => h('pre', { style: 'fontSize: 10px' }, [
             h('code', JSON.stringify(row.original, null, 2)),
           ])"
           :scroll-x="1920"
+          :flex-height="true"
           :pinning-options="{
             withBorder: true,
           }"
@@ -224,7 +226,7 @@ const { table, pagination } = useDataTable<Person>({
           :item-count="pagination.itemCount"
           :is-first-page="pagination.isFirstPage"
           :is-last-page="pagination.isLastPage"
-          size="sm"
+          :show-edges="true"
         >
           <template #prefix="props">
             <span>{{ `${props.startIndex}`.padStart(2, '0') }} of {{ `${props.endIndex}`.padStart(2, '0') }}</span>
