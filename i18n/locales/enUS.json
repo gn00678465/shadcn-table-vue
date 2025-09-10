@@ -7,8 +7,12 @@
     "reset": "Reset",
     "asc": "ASC",
     "desc": "DESC",
+    "pin": "Pin",
     "pin_left": "Pin Left",
+    "pin_left_edge": "Pin to Left Edge",
     "pin_right": "Pin Right",
+    "pin_right_edge": "Pin to Right Edge",
+    "unpin": "Unpin",
     "hide": "Hide"
   }
 }

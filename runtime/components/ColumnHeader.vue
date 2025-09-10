@@ -9,13 +9,18 @@ import {
   X,
   Pin,
 } from 'lucide-vue-next'
-
 import {
   DropdownMenu,
   DropdownMenuGroup,
   DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuPortal,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
@@ -31,7 +36,31 @@ export interface DataTableColumnHeaderProps<TData, TValue> {
 <script setup lang="ts" generic="TData, TValue = unknown">
 const props = defineProps<DataTableColumnHeaderProps<TData, TValue>>()
 
+const position = ref<'left' | 'right' | 'left_edge' | 'right_edge' | undefined>(undefined)
+
 const { t } = useI18n()
+
+watch(position, (newPosition) => {
+  switch (newPosition) {
+    case 'left':
+      break
+    case 'right':
+      break
+    case 'left_edge':
+      props.column.pin('left')
+      break
+    case 'right_edge':
+      props.column.pin('right')
+      break
+    default:
+      props.column.pin(false)
+  }
+})
+
+function onResetPinning() {
+  position.value = undefined
+  props.column.pin(false)
+}
 </script>
 
 <template>
@@ -85,32 +114,42 @@ const { t } = useI18n()
         <DropdownMenuSeparator />
       </template>
       <template v-if="props.column.getCanPin()">
-        <DropdownMenuGroup>
-          <DropdownMenuCheckboxItem
-            class="relative pr-8 pl-2 [&>span:first-child]:right-2 [&>span:first-child]:left-auto [&_svg]:text-muted-foreground"
-            :checked="props.column.getIsPinned() === 'left'"
-            @click="props.column.pin('left')"
-          >
-            <Pin />
-            {{ t('data_table.pin_left') }}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            class="relative pr-8 pl-2 [&>span:first-child]:right-2 [&>span:first-child]:left-auto [&_svg]:text-muted-foreground"
-            :checked="props.column.getIsPinned() === 'right'"
-            @click="props.column.pin('right')"
-          >
-            <Pin />
-            {{ t('data_table.pin_right') }}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuItem
-            v-if="!!props.column.getIsPinned()"
-            class="pl-2 [&_svg]:text-muted-foreground"
-            @click="props.column.pin(false)"
-          >
-            <X />
-            Reset Pin
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Pin class="mr-2 h-4 w-4" />
+            <span>{{ t('data_table.pin') }}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent>
+              <DropdownMenuRadioGroup v-model="position">
+                <!-- <DropdownMenuRadioItem
+                  value="left"
+                >
+                  {{ t('data_table.pin_left') }}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="right"
+                >
+                  {{ t('data_table.pin_right') }}
+                </DropdownMenuRadioItem> -->
+                <DropdownMenuRadioItem value="left_edge">
+                  {{ t('data_table.pin_left_edge') }}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="right_edge">
+                  {{ t('data_table.pin_right_edge') }}
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+              <DropdownMenuItem
+                v-if="!!props.column.getIsPinned()"
+                class="pl-2 [&_svg]:text-muted-foreground"
+                @click="onResetPinning()"
+              >
+                <X />
+                {{ t('data_table.unpin') }}
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
         <DropdownMenuSeparator />
       </template>
       <DropdownMenuCheckboxItem

@@ -56,7 +56,7 @@ const columns: ColumnDef<Person>[] = [
   },
   {
     accessorKey: 'id',
-    header: ({ column }) => {
+    header: ({ column, table }) => {
       return h(DataTableColumnHeader<Person>, {
         title: 'ID',
         column: column,
@@ -66,7 +66,7 @@ const columns: ColumnDef<Person>[] = [
   },
   {
     accessorKey: 'firstName',
-    header: ({ column }) => {
+    header: ({ column, table }) => {
       return h(DataTableColumnHeader<Person>, {
         title: '名',
         column: column,
@@ -76,7 +76,13 @@ const columns: ColumnDef<Person>[] = [
   },
   {
     accessorKey: 'lastName',
-    header: '姓',
+    enablePinning: false,
+    header: ({ column, table }) => {
+      return h(DataTableColumnHeader<Person>, {
+        title: '姓',
+        column: column,
+      })
+    },
     cell: ({ getValue }) => getValue(),
   },
   {
