@@ -107,9 +107,22 @@ const tableStyles = computed(() => {
 })
 
 function renderColGroup() {
-  return h('colgroup', {}, props.table.getVisibleLeafColumns().map((column) => {
+  // 獲取正確的列順序：左固定列 + 中間列 + 右固定列
+  const leftColumns = props.table.getLeftVisibleLeafColumns()
+  const centerColumns = props.table.getCenterVisibleLeafColumns()
+  const rightColumns = props.table.getRightVisibleLeafColumns()
+  const orderedColumns = [...leftColumns, ...centerColumns, ...rightColumns]
+
+  return h('colgroup', {}, orderedColumns.map((column) => {
+    const isPinned = column.getIsPinned()
+    const columnSize = column.getSize()
+
+    // 對於 pinned 列，總是設定明確的寬度（即使是預設值 150）
+    // 對於非 pinned 列，如果是預設值 150 則不設定 width 屬性
+    const width = isPinned ? columnSize : (columnSize === 150 ? undefined : columnSize)
+
     return h('col', {
-      width: column.getSize() === 150 ? undefined : column.getSize(),
+      width,
     })
   }))
 }
