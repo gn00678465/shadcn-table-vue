@@ -2,12 +2,13 @@
 import type { HTMLAttributes } from 'vue'
 import type { Column } from '@tanstack/vue-table'
 import {
-  ChevronDown,
-  ChevronsUpDown,
-  ChevronUp,
+  ArrowUp,
   EyeOff,
   X,
   Pin,
+  ArrowDownUp,
+  ArrowDown,
+  PinOff,
 } from 'lucide-vue-next'
 import {
   DropdownMenu,
@@ -36,20 +37,16 @@ export interface DataTableColumnHeaderProps<TData, TValue> {
 <script setup lang="ts" generic="TData, TValue = unknown">
 const props = defineProps<DataTableColumnHeaderProps<TData, TValue>>()
 
-const position = ref<'left' | 'right' | 'left_edge' | 'right_edge' | undefined>(undefined)
+const position = ref<'left' | 'right' | undefined>(undefined)
 
 const { t } = useI18n()
 
 watch(position, (newPosition) => {
   switch (newPosition) {
     case 'left':
-      break
-    case 'right':
-      break
-    case 'left_edge':
       props.column.pin('left')
       break
-    case 'right_edge':
+    case 'right':
       props.column.pin('right')
       break
     default:
@@ -73,9 +70,9 @@ function onResetPinning() {
     >
       {{ props.title }}
       <template v-if="props.column.getCanSort()">
-        <ChevronDown v-if="props.column.getIsSorted() === 'desc'" />
-        <ChevronUp v-else-if="props.column.getIsSorted() === 'asc'" />
-        <ChevronsUpDown v-else />
+        <ArrowDown v-if="props.column.getIsSorted() === 'desc'" />
+        <ArrowUp v-else-if="props.column.getIsSorted() === 'asc'" />
+        <ArrowDownUp v-else />
       </template>
       <template v-if="props.column.getCanPin()">
         <Pin v-if="!!props.column.getIsPinned()" />
@@ -91,7 +88,7 @@ function onResetPinning() {
             :checked="props.column.getIsSorted() === 'asc'"
             @click="props.column.toggleSorting(false)"
           >
-            <ChevronUp />
+            <ArrowUp />
             {{ t('data_table.asc') }}
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
@@ -99,7 +96,7 @@ function onResetPinning() {
             :checked="props.column.getIsSorted() === 'desc'"
             @click="props.column.toggleSorting(true)"
           >
-            <ChevronDown />
+            <ArrowDown />
             {{ t('data_table.desc') }}
           </DropdownMenuCheckboxItem>
           <DropdownMenuItem
@@ -122,21 +119,11 @@ function onResetPinning() {
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
               <DropdownMenuRadioGroup v-model="position">
-                <!-- <DropdownMenuRadioItem
-                  value="left"
-                >
+                <DropdownMenuRadioItem value="left">
                   {{ t('data_table.pin_left') }}
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="right"
-                >
+                <DropdownMenuRadioItem value="right">
                   {{ t('data_table.pin_right') }}
-                </DropdownMenuRadioItem> -->
-                <DropdownMenuRadioItem value="left_edge">
-                  {{ t('data_table.pin_left_edge') }}
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="right_edge">
-                  {{ t('data_table.pin_right_edge') }}
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
               <DropdownMenuItem
@@ -144,7 +131,7 @@ function onResetPinning() {
                 class="pl-2 [&_svg]:text-muted-foreground"
                 @click="onResetPinning()"
               >
-                <X />
+                <PinOff />
                 {{ t('data_table.unpin') }}
               </DropdownMenuItem>
             </DropdownMenuSubContent>
