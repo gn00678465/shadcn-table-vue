@@ -360,10 +360,14 @@ const vScrollSync: Directive<HTMLDivElement> = {
               'table-fixed',
               [scrollX && 'min-w-[var(--min-width)]'],
             )"
+            :style="{ ...pick(props.style || {}, ['height', 'min-height', 'max-height']) }"
           >
             <component :is="renderColGroup" />
             <TableBody>
-              <Empty :colspan="table.getVisibleLeafColumns().length">
+              <Empty
+                :colspan="table.getVisibleLeafColumns().length"
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+              >
                 <template #default>
                   <slot name="empty" />
                 </template>
